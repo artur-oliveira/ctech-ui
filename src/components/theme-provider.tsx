@@ -1,3 +1,16 @@
+"use client"
+
+// Required, and the one file in this package where leaving it out breaks more
+// than this file. `createContext` runs at module scope, and the package's entry
+// point is a barrel that re-exports everything — so a React Server Component
+// importing *any* primitive evaluates this module, and the build fails with
+// "You're importing a module that depends on createContext into a React Server
+// Component" pointing at the consumer's page rather than at this line.
+//
+// Every other component here is server-safe and deliberately carries no
+// directive: marking them would push work to the client that does not need to
+// be there. This one genuinely holds state.
+
 import {createContext, useContext} from "react"
 import type {ComponentProps, ReactNode} from "react"
 
