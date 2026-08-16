@@ -1,0 +1,65 @@
+/* Product themes. Only aliases change per product; success, warning and
+   danger deliberately remain stable across the CTech ecosystem. */
+:where([data-ctech-theme]) {
+  --color-background: oklch(1 0 0);
+  --color-surface: oklch(0.97 0.008 255);
+  --color-foreground: oklch(0.18 0.02 255);
+  --color-muted-foreground: oklch(0.38 0.025 255);
+  --color-border: oklch(0.9 0.012 255);
+  --color-success: oklch(0.5 0.13 150);
+  /* This is text as well as a fill. At this lightness it clears AA on white
+     and on its own 10% tint, unlike a decorative amber. */
+  --color-warning: oklch(0.46 0.12 70);
+  --color-danger: oklch(0.55 0.19 22);
+  --color-danger-strong: oklch(0.47 0.175 22);
+  --shadow-modal: 0 12px 36px oklch(0.18 0.02 255 / 0.22);
+}
+
+:where([data-ctech-theme="account"]) {
+  --brand-50: oklch(0.96 0.035 258);
+  --brand-600: oklch(0.55 0.22 258);
+  --brand-700: oklch(0.48 0.2 258);
+  --color-ring: var(--brand-600);
+}
+
+:where([data-ctech-theme="dfe"]) {
+  --brand-50: oklch(0.96 0.035 165);
+  --brand-600: oklch(0.44 0.1 165);
+  --brand-700: oklch(0.37 0.09 165);
+  --color-ring: var(--brand-600);
+}
+
+:where([data-ctech-theme="wallet"]) {
+  --brand-50: oklch(0.96 0.03 296);
+  --brand-600: oklch(0.54 0.2 296);
+  --brand-700: oklch(0.46 0.18 296);
+  --color-ring: var(--brand-600);
+}
+
+:where([data-ctech-theme="poker"]) {
+  --color-background: oklch(0.15 0.014 20);
+  --color-surface: oklch(0.21 0.02 20);
+  --color-foreground: oklch(0.95 0.015 20);
+  --color-muted-foreground: oklch(0.78 0.025 20);
+  --color-border: oklch(0.32 0.025 20);
+  --brand-50: oklch(0.9 0.06 27);
+  --brand-600: oklch(0.48 0.16 27);
+  --brand-700: oklch(0.4 0.14 27);
+  --color-ring: oklch(0.72 0.14 27);
+  --color-success: oklch(0.76 0.13 150);
+  --color-warning: oklch(0.79 0.12 82);
+  --color-danger: oklch(0.74 0.16 22);
+  --shadow-modal: 0 16px 40px oklch(0.04 0.01 20 / 0.56);
+}
+
+:where([data-ctech-theme="billing"]) {
+  --brand-50: oklch(0.965 0.014 45);
+  --brand-600: oklch(0.44 0.095 45);
+  --brand-700: oklch(0.38 0.085 45);
+  --color-foreground: oklch(0.22 0.014 45);
+  --color-muted-foreground: oklch(0.49 0.018 45);
+  --color-border: oklch(0.91 0.006 45);
+  --color-surface: oklch(0.976 0.004 45);
+  --color-ring: var(--brand-600);
+  --shadow-modal: 0 16px 48px -12px oklch(0.22 0.014 45 / 0.28);
+}

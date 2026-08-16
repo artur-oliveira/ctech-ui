@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@import "../src/styles/styles.css";
+
+@source "../src";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-brand-50: var(--brand-50);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-danger-strong: var(--danger-strong);
+  --shadow-modal: var(--shadow-modal);
+}
+
+@layer base {
+  * { @apply border-border; }
+  body { @apply m-0 bg-background font-sans text-foreground antialiased; }
+  :where(a, button, input, textarea, select):not([data-slot]):focus-visible { outline: 3px solid color-mix(in oklab, var(--ring) 45%, transparent); outline-offset: 2px; }
+}
