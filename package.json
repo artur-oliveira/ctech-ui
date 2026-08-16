@@ -4,7 +4,7 @@
   "description": "Shared CTech UI primitives: Base UI behaviour, Tailwind classes, no colours of its own. Themed entirely by the consuming app's CSS variables.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/artur-oliveira/ctech-ui"
+    "url": "git+https://github.com/artur-oliveira/ctech-ui"
   },
   "type": "module",
   "main": "./dist/index.js",
