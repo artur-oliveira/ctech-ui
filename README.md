@@ -102,6 +102,10 @@ so a badge renders what the server said rather than a client-side mapping of an 
 | `EmptyState` | Title, description, optional action. |
 | `Skeleton` | Honours `prefers-reduced-motion`. |
 | `Separator` | Horizontal and vertical. |
+| `Checkbox` | Base UI `Checkbox`. |
+| `Radio` + `RadioGroup` | Base UI `Radio`. |
+| `Switch` | Base UI `Switch`. |
+| `DatePicker` + `Calendar` | Built on `react-day-picker`. |
 
 Deliberately small. Components arrive when a second app needs one, not in anticipation — the whole
 point of extracting this was to stop maintaining four copies, and a component with one consumer is

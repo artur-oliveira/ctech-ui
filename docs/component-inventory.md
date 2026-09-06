@@ -10,18 +10,19 @@ Um componente entra em `@aoctech/ui` quando pelo menos dois produtos precisam do
 |---|---|
 | Tema | `ThemeProvider`, cinco temas CTech, densidade, tokens core e semânticos |
 | Ações | `Button` |
-| Formulários | `Field`, `Input` |
+| Formulários | `Field`, `Input`, `Checkbox`, `Radio`/`RadioGroup`, `Switch`, `DatePicker`/`Calendar` |
 | Feedback | `Alert`, `Badge`, `Skeleton`, `EmptyState` |
 | Estrutura | `PageHeader`, `Separator` |
 | Overlay | `Modal` baseado em Base UI |
 
 ## Próximas extrações — condicionadas a dois consumidores
 
-1. Select, Combobox, Checkbox, Switch, Radio e Textarea.
+1. Select, Combobox e Textarea.
 2. Tooltip, Popover, DropdownMenu, Toast e ConfirmDialog.
 3. Tabs, Pagination, Breadcrumb e navegação responsiva.
 4. DataTable, filtros, seleção em lote e estados de lista.
 5. AppShell e padrões de formulário multi-etapa.
+6. Uma tela de status compartilhada (título + descrição + ação + slot de wordmark) para 404/500/manutenção — hoje cada produto reimplementa a própria (ex.: `ctech-billing/ui/src/components/StatusScreen.tsx`), inclusive o único consumidor atual deste pacote.
 
 ## Não centralizar
 
