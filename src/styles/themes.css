@@ -63,3 +63,11 @@
   --color-ring: var(--brand-600);
   --shadow-modal: 0 16px 48px -12px oklch(0.22 0.014 45 / 0.28);
 }
+
+/* Auction is additive: existing themes and default fallback are unchanged. */
+:where([data-ctech-theme="auction"]) {
+  --brand-50: oklch(0.96 0.022 215);
+  --brand-600: oklch(0.47 0.08 215);
+  --brand-700: oklch(0.40 0.07 215);
+  --color-ring: var(--brand-600);
+}

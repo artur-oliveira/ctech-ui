@@ -35,3 +35,7 @@ uma paleta de ambiente, não uma escala linear: marca `#af2a2f`, vinho
 3. Um novo produto entra com sua paleta de origem, mapeamento semântico e prévia Storybook em claro/escuro quando
    aplicável.
 4. O componente usa papéis como `brand`, `danger` e `surface`; nunca o nome de uma marca.
+
+## Auction (adição compatível)
+
+CTech Auction usa petróleo (hue 215), distinto de DFE e Account. `brand-50` = `oklch(.96 .022 215)`, `brand-600` = `oklch(.47 .08 215)`, `brand-700` = `oklch(.40 .07 215)`, foco em `brand-600`. Conserva os tokens de superfície, estados e escala comuns. ThemeProvider aceita `auction`, inclusive em portais; nenhum tema/default existente muda. A prévia de Theme Registry inclui Auction. Modo escuro não é prometido por esta adição. Disponível em @aoctech/ui 0.1.2; não exige atualização dos demais produtos.

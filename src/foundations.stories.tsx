@@ -1,6 +1,6 @@
 import type {Meta, StoryObj} from "@storybook/react-vite"
 
-const themes = ["account", "dfe", "wallet", "poker", "billing"] as const
+const themes = ["account", "dfe", "wallet", "poker", "billing", "auction"] as const
 
 function ThemeRegistry() {
   return (

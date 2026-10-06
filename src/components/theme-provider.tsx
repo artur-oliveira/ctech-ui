@@ -14,7 +14,7 @@
 import {createContext, useContext} from "react"
 import type {ComponentProps, ReactNode} from "react"
 
-type CTechTheme = "account" | "dfe" | "wallet" | "poker" | "billing"
+type CTechTheme = "account" | "dfe" | "wallet" | "poker" | "billing" | "auction"
 type Density = "comfortable" | "compact"
 
 interface ThemeProviderProps extends ComponentProps<"div"> {
