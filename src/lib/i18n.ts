@@ -39,6 +39,16 @@ const modalMessages = {
   en: {submit: "Save", cancel: "Cancel", close: "Close", loading: "Please wait…"},
 } as const
 
+const bottomNavMessages = {
+  "pt-BR": {nav: "Navegação principal", close: "Fechar"},
+  en: {nav: "Main navigation", close: "Close"},
+} as const
+
+const userMenuMessages = {
+  "pt-BR": {trigger: "Menu da conta", views: "Alternar visão", signOut: "Sair"},
+  en: {trigger: "Account menu", views: "Switch view", signOut: "Sign out"},
+} as const
+
 const errorMessages = {
   "pt-BR": {
     400: {title: "Não foi possível abrir este endereço", description: "Confira os parâmetros do link ou volte ao início para continuar."},
@@ -56,6 +66,8 @@ const errorMessages = {
 
 type DatePickerLabels = {-readonly [K in keyof (typeof datePickerMessages)["en"]]: string}
 type ModalLabels = {-readonly [K in keyof (typeof modalMessages)["en"]]: string}
+type BottomNavLabels = {-readonly [K in keyof (typeof bottomNavMessages)["en"]]: string}
+type UserMenuLabels = {-readonly [K in keyof (typeof userMenuMessages)["en"]]: string}
 
 function getDatePickerLabels(locale: Locale | undefined, overrides?: Partial<DatePickerLabels>): DatePickerLabels {
   return {...datePickerMessages[resolveCatalog(locale)], ...overrides}
@@ -65,18 +77,30 @@ function getModalLabels(locale: Locale | undefined, overrides?: Partial<ModalLab
   return {...modalMessages[resolveCatalog(locale)], ...overrides}
 }
 
+function getBottomNavLabels(locale: Locale | undefined, overrides?: Partial<BottomNavLabels>): BottomNavLabels {
+  return {...bottomNavMessages[resolveCatalog(locale)], ...overrides}
+}
+
+function getUserMenuLabels(locale: Locale | undefined, overrides?: Partial<UserMenuLabels>): UserMenuLabels {
+  return {...userMenuMessages[resolveCatalog(locale)], ...overrides}
+}
+
 function getErrorMessages(locale: Locale | undefined) {
   return errorMessages[resolveCatalog(locale)]
 }
 
 export {
   DEFAULT_LOCALE,
+  getBottomNavLabels,
   getDatePickerLabels,
   getErrorMessages,
   getModalLabels,
+  getUserMenuLabels,
   resolveCatalog,
+  type BottomNavLabels,
   type CatalogLocale,
   type DatePickerLabels,
   type Locale,
   type ModalLabels,
+  type UserMenuLabels,
 }

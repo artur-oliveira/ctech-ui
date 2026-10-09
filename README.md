@@ -106,12 +106,80 @@ so a badge renders what the server said rather than a client-side mapping of an 
 | `Radio` + `RadioGroup` | Base UI `Radio`. |
 | `Switch` | Base UI `Switch`. |
 | `DatePicker` + `Calendar` | Built on `react-day-picker`. `locale` (BCP-47, default `"pt-BR"`; `"en"` built in) drives calendar names, first weekday, displayed date (Intl) and aria copy; `labels` overrides single strings. `Modal` and `ErrorState` take the same `locale` (Modal also `labels`). Since 0.2.0. |
+| `BottomNav` | Phone-only primary nav (hidden from `md`): up to four tabs, an optional central action, an optional "more" tab that opens a bottom sheet (Base UI `Drawer`). Since 0.3.0. |
+| `UserMenu` | Avatar (initials or image) opening a Base UI `Menu`: full name and e-mail, optional view switcher, extra items, sign-out. Since 0.3.0. |
+
+### Navigation: `BottomNav` and `UserMenu`
+
+Neither knows anything about routing. The caller says which item is `active` (or `current`) from
+its own router, and passes `renderLink` so links navigate client-side; without it a plain `<a>` is
+rendered. Items take `href` (a link) or `onClick` (a button).
+
+```tsx
+import Link from "next/link"
+import {BottomNav, BottomNavSpacer, UserMenu, type RenderLink} from "@aoctech/ui"
+
+const renderLink: RenderLink = props => <Link {...props} />
+
+<UserMenu
+  name={session.name}
+  email={session.email}
+  imageUrl={session.avatarUrl}
+  views={[
+    {label: "Portal", href: "/dashboard", current: !inConsole},
+    {label: "Console", href: "/console/overview", current: inConsole},
+  ]}
+  onSignOut={logout}
+  renderLink={renderLink}
+/>
+
+<main>
+  {children}
+  <BottomNavSpacer />   {/* keeps the page's end clear of the bar; gone from md up */}
+</main>
+<BottomNav
+  renderLink={renderLink}
+  action={{label: "Novo", icon: <Plus />, onClick: openCreate}}   // or null on screens without one
+  items={[
+    {label: "Resumo", icon: <Home />, href: "/console/finance", active: pathname === "/console/finance"},
+    {label: "A pagar/receber", icon: <Receipt />, href: "/console/finance/bills", active: is("/bills")},
+    {label: "Extrato", icon: <List />, href: "/console/finance/statement", active: is("/statement")},
+    {type: "more", label: "Mais", icon: <Menu />, items: [
+      {label: "Recorrências", icon: <Repeat />, href: "/console/finance/recurrences", active: is("/recurrences")},
+      {label: "Cartões", icon: <CreditCard />, href: "/console/finance/cards", active: is("/cards")},
+      {label: "Importar", icon: <Upload />, href: "/console/finance/import", active: is("/import")},
+      {label: "Relatórios", icon: <Chart />, href: "/console/finance/reports", active: is("/reports"), group: "Análise"},
+      {label: "Configuração", icon: <Settings />, href: "/console/finance/accounts", active: is("/accounts"), group: "Análise"},
+    ]},
+  ]}
+/>
+```
+
+- **Four tabs at most**, split evenly around the action, which stays dead centre. Labels wrap to two
+  lines (after a `/` first) rather than truncating; keep them short anyway.
+- **The "more" tab** is shown active when any sheet item is (`active` overrides). Sheet items with
+  the same `group` are listed under that heading. Choosing one closes the sheet; Escape, the close
+  button and swipe-down close it too, and focus returns to the tab.
+- **Safe area:** the bar pads itself by `env(safe-area-inset-bottom)` — the app needs
+  `viewport-fit=cover` in its viewport meta for that inset to be non-zero. Clear the page's end
+  with `<BottomNavSpacer />`, or with the `bottomNavInset` class string on a container that owns its
+  bottom padding.
+- **Always touch-sized**, whatever `data-density` says: a console that is compact on a desk is still a
+  thumb on a phone. Bar targets are 72px tall and at least 60px wide on a 320px screen; sheet rows are 48px tall.
+- **Copy:** `locale` (default `"pt-BR"`) and `labels` as in `Modal` — `BottomNav` labels `nav`,
+  `close`; `UserMenu` labels `trigger`, `views`, `signOut`.
 
 Deliberately small. Components arrive when a second app needs one, not in anticipation — the whole
 point of extracting this was to stop maintaining four copies, and a component with one consumer is
 still one copy.
 
 The extraction queue and non-domain boundaries live in [docs/component-inventory.md](docs/component-inventory.md). The source palette references and the rules for adding a product live in [docs/theme-registry.md](docs/theme-registry.md).
+
+## Tests
+
+```sh
+npm test   # node:test for pure logic, vitest + jsdom for component behaviour, then the build
+```
 
 ## Storybook
 
