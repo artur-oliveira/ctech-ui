@@ -31,7 +31,6 @@ function Calendar({selected, onSelect, disabled, className, locale = DEFAULT_LOC
       // Open on the selected date's month, not today's: editing a date months
       // away otherwise starts by paging back to it.
       defaultMonth={selected}
-      labels={LABELS}
       selected={selected}
       onSelect={onSelect}
       disabled={disabled}
