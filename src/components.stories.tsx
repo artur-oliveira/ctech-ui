@@ -9,6 +9,7 @@ import {Field as FieldComponent} from "./components/field"
 import {Input as InputComponent} from "./components/input"
 import {EmptyState as EmptyStateComponent} from "./components/empty-state"
 import {Modal as ModalComponent} from "./components/modal"
+import {Drawer as DrawerComponent} from "./components/drawer"
 import {PageHeader as PageHeaderComponent} from "./components/page-header"
 import {Separator as SeparatorComponent} from "./components/separator"
 import {Skeleton as SkeletonComponent} from "./components/skeleton"
@@ -72,3 +73,10 @@ export const Modal: StoryObj = {render: () => <ModalExample initialOpen />}
 export const SelectionControls: StoryObj = {render: () => <SelectionControlsExample />, name: "Checkbox, Radio & Switch"}
 export const DatePicker: StoryObj = {render: () => <DatePickerExample />, name: "Date Picker"}
 export const ThemeProvider: StoryObj = {render: () => <ThemeProviderExample />}
+
+function DrawerExample() {
+  const [open, setOpen] = useState(true)
+  return <main className="mx-auto max-w-5xl"><ButtonComponent onClick={() => setOpen(true)}>Nova conta</ButtonComponent><DrawerComponent open={open} onClose={() => setOpen(false)} title="Nova conta a pagar" description="Registre o vencimento para acompanhar."><p className="text-sm text-muted-foreground">O formulário fica aqui, com os próprios botões.</p></DrawerComponent></main>
+}
+
+export const Drawer: StoryObj = {render: () => <DrawerExample />}
