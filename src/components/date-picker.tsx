@@ -1,6 +1,7 @@
 "use client"
 
 import {Popover} from "@base-ui/react/popover"
+import {format} from "date-fns"
 import {ptBR} from "date-fns/locale/pt-BR"
 import {useState} from "react"
 import {DayPicker} from "react-day-picker"
@@ -17,10 +18,24 @@ interface CalendarProps {
 }
 
 /** An inline, keyboard-operable calendar. Use DatePicker for a field trigger. */
+// react-day-picker's default labels are English ("Go to the Previous Month",
+// "Today, …"): a screen reader in a pt-BR product read half its calendar in
+// another language.
+const LABELS = {
+  labelPrevious: () => "Mês anterior",
+  labelNext: () => "Próximo mês",
+  labelDayButton: (date: Date, modifiers: {today?: boolean; selected?: boolean}) =>
+    `${modifiers.today ? "Hoje, " : ""}${format(date, "PPPP", {locale: ptBR})}${modifiers.selected ? ", selecionado" : ""}`,
+}
+
 function Calendar({selected, onSelect, disabled, className}: CalendarProps) {
   return (
     <DayPicker
       mode="single"
+      // Open on the selected date's month, not today's: editing a date months
+      // away otherwise starts by paging back to it.
+      defaultMonth={selected}
+      labels={LABELS}
       selected={selected}
       onSelect={onSelect}
       disabled={disabled}
