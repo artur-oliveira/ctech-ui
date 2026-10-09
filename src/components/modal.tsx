@@ -4,6 +4,7 @@ import {Dialog} from "@base-ui/react/dialog"
 import type {ReactNode} from "react"
 
 import {cn} from "../lib/cn"
+import {DEFAULT_LOCALE, getModalLabels, type Locale, type ModalLabels} from "../lib/i18n"
 import {Button} from "./button"
 import {useThemeScope} from "./theme-provider"
 
@@ -36,6 +37,10 @@ interface ModalProps {
   danger?: boolean
   submitDisabled?: boolean
   size?: keyof typeof SIZE
+  /** BCP-47 tag for built-in copy. Defaults to "pt-BR". */
+  locale?: Locale
+  /** Overrides built-in strings; submitLabel/cancelLabel take precedence. */
+  labels?: Partial<ModalLabels>
 }
 
 function Modal({
@@ -45,13 +50,16 @@ function Modal({
   description,
   children,
   onSubmit,
-  submitLabel = "Salvar",
-  cancelLabel = "Cancelar",
+  submitLabel,
+  cancelLabel,
   loading = false,
   danger = false,
   submitDisabled = false,
   size = "md",
+  locale = DEFAULT_LOCALE,
+  labels,
 }: ModalProps) {
+  const text = getModalLabels(locale, labels)
   const {theme, density} = useThemeScope()
 
   return (
@@ -93,7 +101,7 @@ function Modal({
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label="Fechar"
+                  aria-label={text.close}
                   className="-mr-2 shrink-0 text-muted-foreground"
                 />
               }
@@ -106,7 +114,7 @@ function Modal({
 
           <footer className="sticky bottom-0 flex justify-end gap-3 border-t border-border bg-surface px-6 py-4">
             <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-              {cancelLabel}
+              {cancelLabel ?? text.cancel}
             </Button>
             {onSubmit && (
               <Button
@@ -115,7 +123,7 @@ function Modal({
                 onClick={onSubmit}
                 disabled={loading || submitDisabled}
               >
-                {loading ? "Aguarde…" : submitLabel}
+                {loading ? text.loading : submitLabel ?? text.submit}
               </Button>
             )}
           </footer>

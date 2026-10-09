@@ -1,27 +1,23 @@
 import type {ReactNode} from "react"
 import {cn} from "../lib/cn"
+import {DEFAULT_LOCALE, getErrorMessages, type Locale} from "../lib/i18n"
 
-const errorMessages = {
-  400: {title: "Não foi possível abrir este endereço", description: "Confira os parâmetros do link ou volte ao início para continuar."},
-  404: {title: "Não encontramos esta página", description: "O endereço pode ter mudado ou o conteúdo não está disponível."},
-  500: {title: "Não foi possível carregar a página", description: "Ocorreu um erro inesperado. Tente novamente em instantes."},
-  503: {title: "Serviço temporariamente indisponível", description: "Estamos sem conexão com o serviço. Verifique sua conexão e tente novamente."},
-} as const
-
-type ErrorStatus = keyof typeof errorMessages
+type ErrorStatus = 400 | 404 | 500 | 503
 interface ErrorStateProps {
   status: ErrorStatus
   title?: string
   description?: string
   action?: ReactNode
   className?: string
+  /** BCP-47 tag for the built-in copy. Defaults to "pt-BR". */
+  locale?: Locale
 }
 
 /** Shared error presentation. Apps own routing, retries and availability checks.
  * Never pass exception messages, stack traces, tokens or private data as copy.
  */
-function ErrorState({status, title, description, action, className}: ErrorStateProps) {
-  const message = errorMessages[status]
+function ErrorState({status, title, description, action, className, locale = DEFAULT_LOCALE}: ErrorStateProps) {
+  const message = getErrorMessages(locale)[status]
   return (
     <section data-slot="error-state" role="alert" className={cn("mx-auto flex max-w-2xl flex-col items-center gap-5 px-5 py-16 text-center", className)}>
       <p className="font-mono text-sm tabular-nums text-muted-foreground">{status}</p>

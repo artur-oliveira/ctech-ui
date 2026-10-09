@@ -105,7 +105,7 @@ so a badge renders what the server said rather than a client-side mapping of an 
 | `Checkbox` | Base UI `Checkbox`. |
 | `Radio` + `RadioGroup` | Base UI `Radio`. |
 | `Switch` | Base UI `Switch`. |
-| `DatePicker` + `Calendar` | Built on `react-day-picker`. |
+| `DatePicker` + `Calendar` | Built on `react-day-picker`. `locale` (BCP-47, default `"pt-BR"`; `"en"` built in) drives calendar names, first weekday, displayed date (Intl) and aria copy; `labels` overrides single strings. `Modal` and `ErrorState` take the same `locale` (Modal also `labels`). Since 0.2.0. |
 
 Deliberately small. Components arrive when a second app needs one, not in anticipation — the whole
 point of extracting this was to stop maintaining four copies, and a component with one consumer is
