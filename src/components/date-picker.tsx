@@ -1,12 +1,13 @@
 "use client"
 
 import {Popover} from "@base-ui/react/popover"
-import {ptBR} from "date-fns/locale/pt-BR"
 import {useState} from "react"
-import {DayPicker} from "react-day-picker"
+import {DateLib, DayPicker} from "react-day-picker"
+import {enUS, ptBR} from "react-day-picker/locale"
 import type {Matcher} from "react-day-picker"
 
 import {cn} from "../lib/cn"
+import {DEFAULT_LOCALE, getDatePickerLabels, resolveCatalog, type DatePickerLabels, type Locale} from "../lib/i18n"
 import {useThemeScope} from "./theme-provider"
 
 interface CalendarProps {
@@ -14,17 +15,33 @@ interface CalendarProps {
   onSelect?: (date: Date | undefined) => void
   disabled?: Matcher | Matcher[]
   className?: string
+  /** BCP-47 tag; drives month/weekday names, first day of week and aria copy. Defaults to "pt-BR". */
+  locale?: Locale
+  /** Overrides individual built-in strings (aria labels). */
+  labels?: Partial<DatePickerLabels>
 }
 
 /** An inline, keyboard-operable calendar. Use DatePicker for a field trigger. */
-function Calendar({selected, onSelect, disabled, className}: CalendarProps) {
+function Calendar({selected, onSelect, disabled, className, locale = DEFAULT_LOCALE, labels}: CalendarProps) {
+  const text = getDatePickerLabels(locale, labels)
+  const dayLocale = resolveCatalog(locale) === "pt-BR" ? ptBR : enUS
   return (
     <DayPicker
       mode="single"
       selected={selected}
       onSelect={onSelect}
       disabled={disabled}
-      locale={ptBR}
+      locale={dayLocale}
+      labels={{
+        labelPrevious: () => text.previousMonth,
+        labelNext: () => text.nextMonth,
+        labelDayButton: (date, modifiers, options, dateLib) => {
+          let label = (dateLib ?? new DateLib(options)).format(date, "PPPP")
+          if (modifiers.today) label = `${text.today}, ${label}`
+          if (modifiers.selected) label = `${label}, ${text.selected}`
+          return label
+        },
+      }}
       classNames={{
         month_caption: "calendar-month-caption",
         caption_label: "calendar-caption-label",
@@ -66,6 +83,10 @@ interface DatePickerProps {
   min?: Date
   max?: Date
   defaultOpen?: boolean
+  /** BCP-47 tag (e.g. "pt-BR", "en"). Drives calendar, date display and copy. Defaults to "pt-BR". */
+  locale?: Locale
+  /** Overrides individual built-in strings (placeholder, today, selected, month navigation). */
+  labels?: Partial<DatePickerLabels>
 }
 
 /**
@@ -77,7 +98,7 @@ function DatePicker({
   value,
   defaultValue,
   onValueChange,
-  placeholder = "Selecionar data",
+  placeholder,
   disabled = false,
   id,
   name,
@@ -85,6 +106,8 @@ function DatePicker({
   min,
   max,
   defaultOpen = false,
+  locale = DEFAULT_LOCALE,
+  labels,
 }: DatePickerProps) {
   const [uncontrolledValue, setUncontrolledValue] = useState<Date | undefined>(defaultValue)
   const [open, setOpen] = useState(defaultOpen)
@@ -94,9 +117,8 @@ function DatePicker({
     ...(min ? [{before: min}] : []),
     ...(max ? [{after: max}] : []),
   ]
-  const label = selected
-    ? new Intl.DateTimeFormat("pt-BR", {day: "2-digit", month: "long", year: "numeric"}).format(selected)
-    : placeholder
+  const text = getDatePickerLabels(locale, labels)
+  const label = selected ? formatDateLabel(selected, locale) : placeholder ?? text.placeholder
 
   function selectDate(date: Date | undefined) {
     if (value === undefined) setUncontrolledValue(date)
@@ -123,12 +145,20 @@ function DatePicker({
       <Popover.Portal data-ctech-theme={theme} data-density={density}>
         <Popover.Positioner side="bottom" align="start" sideOffset={8} className="z-50">
           <Popover.Popup className="rounded-xl border border-border bg-background shadow-modal outline-none transition-[opacity,scale] duration-150 data-[ending-style]:scale-[0.98] data-[ending-style]:opacity-0 data-[starting-style]:scale-[0.98] data-[starting-style]:opacity-0 motion-reduce:transition-none">
-            <Calendar selected={selected} onSelect={selectDate} disabled={disabled || disabledDays.length > 0 ? (disabled ? true : disabledDays) : undefined} />
+            <Calendar locale={locale} labels={labels} selected={selected} onSelect={selectDate} disabled={disabled || disabledDays.length > 0 ? (disabled ? true : disabledDays) : undefined} />
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>
     </Popover.Root>
   )
+}
+
+function formatDateLabel(value: Date, locale: Locale) {
+  try {
+    return new Intl.DateTimeFormat(locale, {day: "2-digit", month: "long", year: "numeric"}).format(value)
+  } catch {
+    return new Intl.DateTimeFormat(DEFAULT_LOCALE, {day: "2-digit", month: "long", year: "numeric"}).format(value)
+  }
 }
 
 function formatDateValue(value: Date) {

@@ -1,4 +1,5 @@
 export {cn} from "./lib/cn"
+export {type DatePickerLabels, type Locale, type ModalLabels} from "./lib/i18n"
 
 export {Badge, badgeVariants, type BadgeTone} from "./components/badge"
 export {Button, buttonVariants} from "./components/button"
