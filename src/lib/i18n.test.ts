@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import {test} from "node:test"
 
-import {getDatePickerLabels, getErrorMessages, getModalLabels, resolveCatalog} from "./i18n.ts"
+import {getBottomNavLabels, getDatePickerLabels, getErrorMessages, getModalLabels, getUserMenuLabels, resolveCatalog} from "./i18n.ts"
 
 test("resolves BCP-47 tags to a catalog, defaulting to pt-BR", () => {
   assert.equal(resolveCatalog(undefined), "pt-BR")
@@ -31,4 +31,11 @@ test("Intl honours the exact tag for the displayed date", () => {
   const fmt = (l: string) => new Intl.DateTimeFormat(l, {day: "2-digit", month: "long", year: "numeric"}).format(date)
   assert.match(fmt("pt-BR"), /março/)
   assert.match(fmt("en"), /March/)
+})
+
+test("bottom nav and user menu copy per locale, with overrides", () => {
+  assert.equal(getBottomNavLabels("pt-BR").nav, "Navegação principal")
+  assert.equal(getBottomNavLabels("en-GB").close, "Close")
+  assert.equal(getUserMenuLabels(undefined).signOut, "Sair")
+  assert.equal(getUserMenuLabels("en", {signOut: "Log out"}).signOut, "Log out")
 })

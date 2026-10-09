@@ -1,5 +1,6 @@
 export {cn} from "./lib/cn"
-export {type DatePickerLabels, type Locale, type ModalLabels} from "./lib/i18n"
+export {type BottomNavLabels, type DatePickerLabels, type Locale, type ModalLabels, type UserMenuLabels} from "./lib/i18n"
+export {type LinkProps, type RenderLink} from "./lib/link"
 
 export {Badge, badgeVariants, type BadgeTone} from "./components/badge"
 export {Button, buttonVariants} from "./components/button"
@@ -18,3 +19,15 @@ export {Radio, RadioGroup} from "./components/radio"
 export {Switch} from "./components/switch"
 export {ThemeProvider, type CTechTheme, type Density, type ThemeProviderProps} from "./components/theme-provider"
 export {ErrorState, type ErrorStateProps, type ErrorStatus} from "./components/error-state"
+export {
+  BottomNav,
+  BottomNavSpacer,
+  bottomNavInset,
+  type BottomNavAction,
+  type BottomNavItem,
+  type BottomNavMore,
+  type BottomNavProps,
+  type BottomNavSheetItem,
+  type BottomNavTab,
+} from "./components/bottom-nav"
+export {UserMenu, type UserMenuItem, type UserMenuProps, type UserMenuView} from "./components/user-menu"
