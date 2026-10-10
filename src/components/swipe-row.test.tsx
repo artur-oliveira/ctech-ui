@@ -233,6 +233,22 @@ describe("SwipeRow survives interrupted gestures", () => {
     expect(front("Aluguel").style.transform).toBe("")
   })
 
+  // Found by ctech-billing on a real touch screen: a finger's pointer is
+  // implicitly captured by the element it landed on (here the title). When the
+  // swipe locks to the x axis the front calls setPointerCapture, so the title
+  // receives `lostpointercapture`, which bubbles to the front. Only the front's
+  // own lost capture means the browser took the gesture.
+  it("keeps the swipe when a child hands its implicit capture to the front", () => {
+    rows(() => [del()])
+    const title = screen.getByText("Aluguel")
+    fireEvent.pointerDown(title, {...touch(), clientX: 300, clientY: 100})
+    fireEvent.pointerMove(title, {...touch(), clientX: 286, clientY: 100})
+    fireEvent.lostPointerCapture(title, {...touch()})
+    for (let x = 272; x >= 132; x -= 14) fireEvent.pointerMove(front("Aluguel"), {...touch(), clientX: x, clientY: 100})
+    fireEvent.pointerUp(front("Aluguel"), {...touch(), clientX: 132, clientY: 100})
+    expect(front("Aluguel")).toHaveAttribute("data-open", "true")
+  })
+
   it("returns to rest when the window loses focus mid-drag", () => {
     rows(() => [del()])
     drag(front("Aluguel"), -160, 0, {release: false})

@@ -228,8 +228,12 @@ function useSwipeReveal(width: number, {enabled = true, media = PHONE}: SwipeRev
       },
       onPointerCancel: e => end(e, true),
       // Capture lost without a pointerup (the element moved, the browser took
-      // the gesture): treat it as a cancel.
-      onLostPointerCapture: e => { if (g.current?.axis === "x") end(e, true) },
+      // the gesture): treat it as a cancel. Only the front's own loss counts: a
+      // finger is implicitly captured by the child it landed on, and when the
+      // front takes the capture that child's `lostpointercapture` bubbles here.
+      onLostPointerCapture: e => {
+        if (e.target === e.currentTarget && g.current?.axis === "x") end(e, true)
+      },
       onClickCapture: e => {
         if (!swallowClick.current) return
         swallowClick.current = false
