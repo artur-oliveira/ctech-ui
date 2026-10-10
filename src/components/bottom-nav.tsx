@@ -122,7 +122,10 @@ function BottomNav({items, action = null, renderLink = defaultRenderLink, locale
     : `repeat(${tabs.length}, minmax(0, 1fr))`
 
   const renderItem = (item: BottomNavItem, index: number) => (
-    <li key={index} className="min-w-0">
+    // Keyed by the tab's own position in `items`, never by its place in the row:
+    // the central action coming or going shifts where a tab is drawn, and a
+    // positional key would remount it, closing the "more" sheet it has open.
+    <li key={`tab-${index}`} className="min-w-0">
       {isMore(item) ? (
         <MoreTab more={item} renderLink={renderLink} closeLabel={text.close} />
       ) : (
@@ -145,9 +148,11 @@ function BottomNav({items, action = null, renderLink = defaultRenderLink, locale
       )}
     >
       <ul className="grid list-none p-0 m-0" style={{gridTemplateColumns: columns, height: BAR_HEIGHT} satisfies CSSProperties}>
-        {left.map(renderItem)}
-        {action && (
-          <li className="min-w-0">
+        {/* One flat, keyed list, so React matches each tab by key across renders. */}
+        {[
+          ...left.map((item, i) => renderItem(item, i)),
+          action && (
+          <li key="action" className="min-w-0">
             <Target
               target={action}
               renderLink={renderLink}
@@ -170,8 +175,9 @@ function BottomNav({items, action = null, renderLink = defaultRenderLink, locale
               <span className="max-w-full truncate">{action.label}</span>
             </Target>
           </li>
-        )}
-        {right.map((item, i) => renderItem(item, left.length + i))}
+          ),
+          ...right.map((item, i) => renderItem(item, left.length + i)),
+        ]}
       </ul>
     </nav>
   )
@@ -206,7 +212,7 @@ function Target({target, renderLink, className, current, label, children}: Targe
 
 function MoreTab({more, renderLink, closeLabel}: {more: BottomNavMore; renderLink: RenderLink; closeLabel: string}) {
   const [open, setOpen] = useState(false)
-  const {theme, density} = useThemeScope()
+  const {theme} = useThemeScope()
   const groupIdPrefix = useId()
   const active = more.active ?? more.items.some(i => i.active)
   const groups = groupItems(more.items)
@@ -220,7 +226,8 @@ function MoreTab({more, renderLink, closeLabel}: {more: BottomNavMore; renderLin
         <span aria-hidden className={PILL}>{more.icon}</span>
         <span className={TAB_LABEL}>{breakable(more.label)}</span>
       </Primitive.Trigger>
-      <Primitive.Portal data-ctech-theme={theme} data-density={density}>
+      {/* Always comfortable: the sheet is a phone's, whatever density the app uses. */}
+      <Primitive.Portal data-ctech-theme={theme} data-density="comfortable">
         <Primitive.Backdrop
           className={cn(
             "fixed inset-0 z-40 bg-black/40 transition-opacity duration-200 ease-out md:hidden",
