@@ -45,6 +45,21 @@ export function App() {
 }
 ```
 
+#### Theming through your own CSS variables: import `touch.css` only
+
+`styles.css` pulls in `tokens.css` and `themes.css`, and the package's portals (Drawer, Modal,
+Select, RowMenu, UserMenu) carry `data-ctech-theme`. An app that defines its own `--background`,
+`--brand-600`, ... and renders no `ThemeProvider` would see those portals repainted in a package
+theme. Such an app imports the touch rules alone, a stable export since 0.4.1:
+
+```css
+@import "tailwindcss";
+@import "@aoctech/ui/touch.css";
+```
+
+`touch.css` is self-contained (it defines its own `--touch-*` variables and imports nothing). The
+`@source` line below is still needed.
+
 ### 2. The `@source` line
 
 Tailwind v4 only emits classes it can see. It does not scan `node_modules` by default, so without
@@ -91,7 +106,7 @@ portal, outside the element that carries `data-density`, and follow the nearest 
 
 Under a finger (a coarse pointer, or a viewport under Tailwind's `sm`), a compact control is
 **drawn** at 36px and **hit** at 44px: an invisible `::after` centred on it, shipped in
-`styles.css` (`touch.css`) and keyed on each control's `data-slot`. Nothing to wire up. The rules:
+`styles.css` (also exported alone as `@aoctech/ui/touch.css`) and keyed on each control's `data-slot`. Nothing to wire up. The rules:
 
 - The target grows only on an axis where the control is short of 44px, and sideways by at most
   4px. **Keep 8px (`gap-2`) between neighbouring controls**, in a row or a stack: two extensions
@@ -142,7 +157,7 @@ so a badge renders what the server said rather than a client-side mapping of an 
 | `Select` | Base UI `Select`. Shows the chosen label, never the value; optional decorative option `icon`s, an optional `none` option, and `actions` ("+ Novo espaço") that run only from a press in the open list. Since 0.4.0. |
 | `Segmented` | Two to four mutually exclusive choices as toggle buttons (`aria-pressed`); text or icon labels with full names; `fill` for a phone's full width. Since 0.4.0. |
 | `RowMenu` | A row's visible "⋯" menu (Base UI `Menu`). Default name "Mais ações" / "More actions". Since 0.4.0. |
-| `SwipeRow` + `useSwipeReveal` | Swipe left to reveal a row's actions, on a phone. Always paired with `RowMenu`. Since 0.4.0. |
+| `SwipeRow` + `useSwipeReveal` | Swipe left to reveal a row's actions, on a phone. Always paired with `RowMenu`. Since 0.4.0; 0.4.1 fixes a touch swipe cancelled when it started on a child of the row. |
 | `DensityScope` | A compact (or comfortable) surface whose overlays follow it. Since 0.4.0. |
 
 ### Navigation: `BottomNav` and `UserMenu`

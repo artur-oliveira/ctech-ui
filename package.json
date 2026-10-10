@@ -1,6 +1,6 @@
 {
   "name": "@aoctech/ui",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Shared CTech UI primitives: Base UI behaviour, Tailwind classes, no colours of its own. Themed entirely by the consuming app's CSS variables.",
   "repository": {
     "type": "git",
@@ -15,7 +15,8 @@
       "import": "./dist/index.js"
     },
     "./styles.css": "./dist/styles.css",
-    "./themes.css": "./dist/themes.css"
+    "./themes.css": "./dist/themes.css",
+    "./touch.css": "./dist/touch.css"
   },
   "files": [
     "dist"

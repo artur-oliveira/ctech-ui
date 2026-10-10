@@ -43,4 +43,13 @@ describe("touch.css", () => {
     const styles = readFileSync(resolve("src/styles/styles.css"), "utf8")
     expect(styles).toContain('@import "./touch.css"')
   })
+
+  it("is its own stable export, for consumers that theme through their own variables", () => {
+    const pkg = JSON.parse(readFileSync(resolve("package.json"), "utf8"))
+    expect(pkg.exports["./touch.css"]).toBe("./dist/touch.css")
+    expect(readFileSync(resolve("scripts/copy-styles.mjs"), "utf8")).toContain('"dist/touch.css"')
+    // Self-contained: no theme import, and its own variables are defined in it.
+    expect(css).not.toMatch(/@import/)
+    for (const v of ["--touch-visual", "--touch-target", "--touch-reach"]) expect(css).toContain(`${v}:`)
+  })
 })
