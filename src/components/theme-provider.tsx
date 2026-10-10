@@ -28,13 +28,38 @@ interface ThemeScope {
 }
 
 const ThemeContext = createContext<ThemeScope | null>(null)
+/** The nearest DensityScope's density; null outside one, where ThemeProvider's applies. */
+const DensityContext = createContext<Density | null>(null)
 
 /** Scopes a product identity without leaking it through component props. */
 function ThemeProvider({theme, density = "comfortable", children, ...props}: ThemeProviderProps) {
   return (
     <ThemeContext.Provider value={{theme, density}}>
-      <div data-ctech-theme={theme} data-density={density} {...props}>{children}</div>
+      {/* A provider resets any outer DensityScope: its own density wins inside it. */}
+      <DensityContext.Provider value={null}>
+        <div data-ctech-theme={theme} data-density={density} {...props}>{children}</div>
+      </DensityContext.Provider>
     </ThemeContext.Provider>
+  )
+}
+
+interface DensityScopeProps extends ComponentProps<"div"> {
+  density: Density
+}
+
+/**
+ * A surface with its own density inside a themed app: a compact console in a
+ * comfortable product. It writes `data-density` for the controls inside it AND
+ * tells portalled overlays opened from inside it (Drawer, Modal, Select, menus),
+ * which render outside this element and would otherwise fall back to the
+ * provider's density. A compact console therefore gets compact drawers, on a
+ * desktop too.
+ */
+function DensityScope({density, children, ...props}: DensityScopeProps) {
+  return (
+    <DensityContext.Provider value={density}>
+      <div data-density={density} {...props}>{children}</div>
+    </DensityContext.Provider>
   )
 }
 
@@ -44,7 +69,9 @@ function ThemeProvider({theme, density = "comfortable", children, ...props}: The
  * makes an isolated primitive render with the default CTech theme as well.
  */
 function useThemeScope(): ThemeScope {
-  return useContext(ThemeContext) ?? {theme: "account", density: "comfortable"}
+  const scope = useContext(ThemeContext) ?? {theme: "account" as const, density: "comfortable" as const}
+  const density = useContext(DensityContext)
+  return density ? {theme: scope.theme, density} : scope
 }
 
-export {ThemeProvider, useThemeScope, type CTechTheme, type ThemeProviderProps, type Density}
+export {DensityScope, ThemeProvider, useThemeScope, type CTechTheme, type DensityScopeProps, type ThemeProviderProps, type Density}

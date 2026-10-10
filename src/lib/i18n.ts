@@ -49,6 +49,16 @@ const userMenuMessages = {
   en: {trigger: "Account menu", views: "Switch view", signOut: "Sign out"},
 } as const
 
+const rowMenuMessages = {
+  "pt-BR": {trigger: "Mais ações"},
+  en: {trigger: "More actions"},
+} as const
+
+const selectMessages = {
+  "pt-BR": {placeholder: "Selecione…", none: "Nenhum"},
+  en: {placeholder: "Select…", none: "None"},
+} as const
+
 const errorMessages = {
   "pt-BR": {
     400: {title: "Não foi possível abrir este endereço", description: "Confira os parâmetros do link ou volte ao início para continuar."},
@@ -68,6 +78,8 @@ type DatePickerLabels = {-readonly [K in keyof (typeof datePickerMessages)["en"]
 type ModalLabels = {-readonly [K in keyof (typeof modalMessages)["en"]]: string}
 type BottomNavLabels = {-readonly [K in keyof (typeof bottomNavMessages)["en"]]: string}
 type UserMenuLabels = {-readonly [K in keyof (typeof userMenuMessages)["en"]]: string}
+type RowMenuLabels = {-readonly [K in keyof (typeof rowMenuMessages)["en"]]: string}
+type SelectLabels = {-readonly [K in keyof (typeof selectMessages)["en"]]: string}
 
 function getDatePickerLabels(locale: Locale | undefined, overrides?: Partial<DatePickerLabels>): DatePickerLabels {
   return {...datePickerMessages[resolveCatalog(locale)], ...overrides}
@@ -85,6 +97,14 @@ function getUserMenuLabels(locale: Locale | undefined, overrides?: Partial<UserM
   return {...userMenuMessages[resolveCatalog(locale)], ...overrides}
 }
 
+function getRowMenuLabels(locale: Locale | undefined, overrides?: Partial<RowMenuLabels>): RowMenuLabels {
+  return {...rowMenuMessages[resolveCatalog(locale)], ...overrides}
+}
+
+function getSelectLabels(locale: Locale | undefined, overrides?: Partial<SelectLabels>): SelectLabels {
+  return {...selectMessages[resolveCatalog(locale)], ...overrides}
+}
+
 function getErrorMessages(locale: Locale | undefined) {
   return errorMessages[resolveCatalog(locale)]
 }
@@ -95,6 +115,8 @@ export {
   getDatePickerLabels,
   getErrorMessages,
   getModalLabels,
+  getRowMenuLabels,
+  getSelectLabels,
   getUserMenuLabels,
   resolveCatalog,
   type BottomNavLabels,
@@ -102,5 +124,7 @@ export {
   type DatePickerLabels,
   type Locale,
   type ModalLabels,
+  type RowMenuLabels,
+  type SelectLabels,
   type UserMenuLabels,
 }
