@@ -5,8 +5,9 @@ import {useEffect, useState} from "react"
 import type {ReactNode} from "react"
 
 import {cn} from "../lib/cn"
+import {DEFAULT_LOCALE, getModalLabels, type Locale} from "../lib/i18n"
 import {Button} from "./button"
-import {useThemeScope} from "./theme-provider"
+import {useThemeScope, type Density} from "./theme-provider"
 
 /**
  * A panel for a task that needs a form but not a new page (shadcn's Drawer, on
@@ -32,6 +33,13 @@ interface DrawerProps {
   children?: ReactNode
   footer?: ReactNode
   size?: keyof typeof WIDTH
+  /**
+   * The drawer renders in a portal, outside the caller's `[data-density]`. It
+   * follows the nearest `DensityScope` (else `ThemeProvider`); this overrides both.
+   */
+  density?: Density
+  /** BCP-47 tag for the close button's name. Defaults to "pt-BR". */
+  locale?: Locale
 }
 
 /** Right on a wide screen, down on a phone; down until the first effect runs (SSR). */
@@ -49,8 +57,11 @@ function useSide(): "right" | "down" {
   return wide ? "right" : "down"
 }
 
-function Drawer({open, onClose, title, description, children, footer, size = "md"}: DrawerProps) {
-  const {theme, density} = useThemeScope()
+function Drawer({open, onClose, title, description, children, footer, size = "md", density: densityProp, locale = DEFAULT_LOCALE}: DrawerProps) {
+  const scope = useThemeScope()
+  const theme = scope.theme
+  const density = densityProp ?? scope.density
+  const closeLabel = getModalLabels(locale).close
   const side = useSide()
   return (
     <Primitive.Root open={open} onOpenChange={next => !next && onClose()} swipeDirection={side}>
@@ -87,7 +98,7 @@ function Drawer({open, onClose, title, description, children, footer, size = "md
               <Primitive.Title className="text-base font-semibold text-foreground">{title}</Primitive.Title>
               {description && <Primitive.Description className="text-sm text-muted-foreground">{description}</Primitive.Description>}
             </div>
-            <Primitive.Close render={<Button variant="ghost" size="icon" aria-label="Fechar" className="-mr-2 shrink-0 text-muted-foreground" />}>
+            <Primitive.Close render={<Button variant="ghost" size="icon" aria-label={closeLabel} className="-mr-2 shrink-0 text-muted-foreground" />}>
               <CloseGlyph />
             </Primitive.Close>
           </header>

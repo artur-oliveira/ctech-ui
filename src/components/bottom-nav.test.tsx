@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event"
 import {describe, expect, it, vi} from "vitest"
 
 import {BottomNav, BottomNavSpacer, type BottomNavItem} from "./bottom-nav"
+import {ThemeProvider} from "./theme-provider"
 
 const Icon = () => <svg data-testid="icon" />
 
@@ -130,6 +131,35 @@ describe("BottomNav", () => {
     expect(screen.getByRole("navigation", {name: "Main navigation"})).toBeInTheDocument()
     rerender(<BottomNav items={items()} labels={{nav: "Finanças"}} />)
     expect(screen.getByRole("navigation", {name: "Finanças"})).toBeInTheDocument()
+  })
+
+  // The "more" tab used to remount when the central action appeared or went
+  // away (its row position, and so its key, changed), closing an open sheet.
+  it("keeps the more sheet open when the central action comes and goes", async () => {
+    const user = userEvent.setup()
+    const action = {label: "Novo", icon: <Icon />, onClick: () => {}}
+    const {rerender} = render(<BottomNav items={items()} action={null} />)
+    const more = screen.getByRole("button", {name: "Mais"})
+    await user.click(more)
+    await screen.findByRole("dialog", {name: "Mais"})
+
+    rerender(<BottomNav items={items()} action={action} />)
+    expect(screen.getByRole("dialog", {name: "Mais"})).toBeInTheDocument()
+    // The page behind the open sheet is inert, hence `hidden`.
+    expect(screen.getByRole("button", {name: "Mais", hidden: true})).toBe(more)
+
+    rerender(<BottomNav items={items()} action={null} />)
+    expect(screen.getByRole("dialog", {name: "Mais"})).toBeInTheDocument()
+    // The page behind the open sheet is inert, hence `hidden`.
+    expect(screen.getByRole("button", {name: "Mais", hidden: true})).toBe(more)
+  })
+
+  it("keeps its sheet touch-sized inside a compact app", async () => {
+    const user = userEvent.setup()
+    render(<ThemeProvider theme="billing" density="compact"><BottomNav items={items()} /></ThemeProvider>)
+    await user.click(screen.getByRole("button", {name: "Mais"}))
+    const sheet = await screen.findByRole("dialog", {name: "Mais"})
+    expect(sheet.closest("[data-density]")).toHaveAttribute("data-density", "comfortable")
   })
 
   it("offers a spacer that only exists below md", () => {

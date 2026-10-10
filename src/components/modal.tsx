@@ -6,7 +6,7 @@ import type {ReactNode} from "react"
 import {cn} from "../lib/cn"
 import {DEFAULT_LOCALE, getModalLabels, type Locale, type ModalLabels} from "../lib/i18n"
 import {Button} from "./button"
-import {useThemeScope} from "./theme-provider"
+import {useThemeScope, type Density} from "./theme-provider"
 
 /**
  * Built on Base UI's Dialog rather than a hand-rolled portal. The focus trap,
@@ -41,6 +41,11 @@ interface ModalProps {
   locale?: Locale
   /** Overrides built-in strings; submitLabel/cancelLabel take precedence. */
   labels?: Partial<ModalLabels>
+  /**
+   * The modal renders in a portal, outside the caller's `[data-density]`. It
+   * follows the nearest `DensityScope` (else `ThemeProvider`); this overrides both.
+   */
+  density?: Density
 }
 
 function Modal({
@@ -58,9 +63,12 @@ function Modal({
   size = "md",
   locale = DEFAULT_LOCALE,
   labels,
+  density: densityProp,
 }: ModalProps) {
   const text = getModalLabels(locale, labels)
-  const {theme, density} = useThemeScope()
+  const scope = useThemeScope()
+  const theme = scope.theme
+  const density = densityProp ?? scope.density
 
   return (
     <Dialog.Root open={open} onOpenChange={next => !next && onClose()}>

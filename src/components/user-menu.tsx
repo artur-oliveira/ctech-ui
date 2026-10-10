@@ -128,7 +128,7 @@ function UserMenu({
           closeOnClick
           onClick={entry.onClick}
           aria-current={ariaCurrent}
-          className={ITEM}
+          data-slot="menu-item" className={ITEM}
           render={props => renderLink({...props, href})}
         >
           {content}
@@ -136,7 +136,7 @@ function UserMenu({
       )
     }
     return (
-      <Menu.Item key={entry.label} onClick={entry.onClick} aria-current={ariaCurrent} className={ITEM}>
+      <Menu.Item key={entry.label} onClick={entry.onClick} aria-current={ariaCurrent} data-slot="menu-item" className={ITEM}>
         {content}
       </Menu.Item>
     )
@@ -203,7 +203,7 @@ function UserMenu({
             {onSignOut && (
               <>
                 <Menu.Separator className="-mx-1.5 my-1 h-px bg-border" />
-                <Menu.Item onClick={onSignOut} className={ITEM}>
+                <Menu.Item onClick={onSignOut} data-slot="menu-item" className={ITEM}>
                   <span aria-hidden className={ICON}><SignOutGlyph /></span>
                   <span className="min-w-0 flex-1">{text.signOut}</span>
                 </Menu.Item>

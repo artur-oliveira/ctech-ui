@@ -59,6 +59,8 @@ function Button({
   return (
     <ButtonPrimitive
       data-slot="button"
+      // Read by the touch rule (styles/touch.css): an icon button stays square.
+      data-size={size ?? "default"}
       // A custom `render` element (a Link, say) is never a native <button>, so
       // default nativeButton to false there instead of warning on every usage.
       nativeButton={nativeButton ?? !props.render}

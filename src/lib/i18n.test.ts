@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import {test} from "node:test"
 
-import {getBottomNavLabels, getDatePickerLabels, getErrorMessages, getModalLabels, getUserMenuLabels, resolveCatalog} from "./i18n.ts"
+import {getBottomNavLabels, getDatePickerLabels, getErrorMessages, getModalLabels, getRowMenuLabels, getSelectLabels, getUserMenuLabels, resolveCatalog} from "./i18n.ts"
 
 test("resolves BCP-47 tags to a catalog, defaulting to pt-BR", () => {
   assert.equal(resolveCatalog(undefined), "pt-BR")
@@ -38,4 +38,13 @@ test("bottom nav and user menu copy per locale, with overrides", () => {
   assert.equal(getBottomNavLabels("en-GB").close, "Close")
   assert.equal(getUserMenuLabels(undefined).signOut, "Sair")
   assert.equal(getUserMenuLabels("en", {signOut: "Log out"}).signOut, "Log out")
+})
+
+test("row menu and select copy per locale, with overrides", () => {
+  assert.equal(getRowMenuLabels("pt-BR").trigger, "Mais ações")
+  assert.equal(getRowMenuLabels("en-US").trigger, "More actions")
+  assert.equal(getRowMenuLabels("en", {trigger: "Row actions"}).trigger, "Row actions")
+  assert.equal(getSelectLabels(undefined).none, "Nenhum")
+  assert.equal(getSelectLabels("pt-BR", {none: "Nenhuma"}).none, "Nenhuma")
+  assert.equal(getSelectLabels("en").placeholder, "Select…")
 })

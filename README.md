@@ -73,6 +73,37 @@ its root, and every control inside follows:
 That is why `Button` has no `size="console"`: height is decided by where a button is, not by each
 call site remembering which screen it is on.
 
+A compact surface inside a comfortable app is a `DensityScope`. Unlike a bare attribute, it also
+reaches the overlays opened from inside it: `Drawer`, `Modal`, `Select` and `RowMenu` render in a
+portal, outside the element that carries `data-density`, and follow the nearest scope (else the
+`ThemeProvider`). A compact console therefore gets compact drawers, on a desktop too. `Drawer`,
+`Modal` and `Select` also take a `density` prop that overrides both.
+
+```tsx
+<ThemeProvider theme="billing">          {/* the portal: comfortable */}
+  <DensityScope density="compact">       {/* the console */}
+    <Drawer …/>                          {/* compact as well */}
+  </DensityScope>
+</ThemeProvider>
+```
+
+### Touch: compact look, 44px target
+
+Under a finger (a coarse pointer, or a viewport under Tailwind's `sm`), a compact control is
+**drawn** at 36px and **hit** at 44px: an invisible `::after` centred on it, shipped in
+`styles.css` (`touch.css`) and keyed on each control's `data-slot`. Nothing to wire up. The rules:
+
+- The target grows only on an axis where the control is short of 44px, and sideways by at most
+  4px. **Keep 8px (`gap-2`) between neighbouring controls**, in a row or a stack: two extensions
+  then meet and never overlap (with less, the later control wins the shared edge).
+- Icon buttons stay square (36 x 36 drawn, 44 x 44 hit).
+- `Segmented` segments touch, so theirs grow vertically only, at every density.
+- An input is reached through its `Field` label, whose target sits behind the field's content: a
+  link or button in a hint or error keeps its own taps.
+- Select options and menu items are 44px rows under touch.
+- Anything else drawn as a control (a link styled as a button, a tab) opts in with the class
+  `touch-target`. A control the caller positions (`absolute`, `fixed`, `sticky`) keeps its position.
+
 ## Brand colour and status colour never meet
 
 `Button variant="brand"` is the only place brand colour appears. `Badge` carries the four status
@@ -108,6 +139,11 @@ so a badge renders what the server said rather than a client-side mapping of an 
 | `DatePicker` + `Calendar` | Built on `react-day-picker`. `locale` (BCP-47, default `"pt-BR"`; `"en"` built in) drives calendar names, first weekday, displayed date (Intl) and aria copy; `labels` overrides single strings. `Modal` and `ErrorState` take the same `locale` (Modal also `labels`). Since 0.2.0. |
 | `BottomNav` | Phone-only primary nav (hidden from `md`): up to four tabs, an optional central action, an optional "more" tab that opens a bottom sheet (Base UI `Drawer`). Since 0.3.0. |
 | `UserMenu` | Avatar (initials or image) opening a Base UI `Menu`: full name and e-mail, optional view switcher, extra items, sign-out. Since 0.3.0. |
+| `Select` | Base UI `Select`. Shows the chosen label, never the value; optional decorative option `icon`s, an optional `none` option, and `actions` ("+ Novo espaço") that run only from a press in the open list. Since 0.4.0. |
+| `Segmented` | Two to four mutually exclusive choices as toggle buttons (`aria-pressed`); text or icon labels with full names; `fill` for a phone's full width. Since 0.4.0. |
+| `RowMenu` | A row's visible "⋯" menu (Base UI `Menu`). Default name "Mais ações" / "More actions". Since 0.4.0. |
+| `SwipeRow` + `useSwipeReveal` | Swipe left to reveal a row's actions, on a phone. Always paired with `RowMenu`. Since 0.4.0. |
+| `DensityScope` | A compact (or comfortable) surface whose overlays follow it. Since 0.4.0. |
 
 ### Navigation: `BottomNav` and `UserMenu`
 
@@ -168,6 +204,69 @@ const renderLink: RenderLink = props => <Link {...props} />
   thumb on a phone. Bar targets are 72px tall and at least 60px wide on a 320px screen; sheet rows are 48px tall.
 - **Copy:** `locale` (default `"pt-BR"`) and `labels` as in `Modal` — `BottomNav` labels `nav`,
   `close`; `UserMenu` labels `trigger`, `views`, `signOut`.
+
+### Interactions: `Segmented`, `Select`, `RowMenu`, `SwipeRow`
+
+```tsx
+import {RowMenu, Segmented, Select, SwipeRow, type RowMenuItem} from "@aoctech/ui"
+
+<Segmented
+  label="Período"                       // names the group
+  value={period}
+  onValueChange={setPeriod}
+  options={[
+    {value: "6m", label: "6 m", name: "6 meses"},   // a short label carries its full name
+    {value: "chart", label: <ChartIcon />, name: "Gráfico"},
+  ]}
+  fill                                  // share a phone's full width
+/>
+
+<Field label="Bandeira" htmlFor="brand">
+  <Select
+    id="brand"
+    value={brand}                       // "" is "nothing chosen"
+    onValueChange={setBrand}
+    options={[{value: "visa", label: "Visa", icon: <VisaMark />}]}   // icons are decoration
+    none="Nenhuma"                      // or `none` for the catalogue's "Nenhum" / "None"
+    actions={[{label: "Nova bandeira", icon: <Plus />, onSelect: openCreate}]}
+  />
+</Field>
+```
+
+`Select`'s actions run only on a press in the open list (`reason === "item-press"`): Base UI types
+ahead on a closed, focused trigger, and "n" there must not start "Novo espaço" and leave the page.
+
+**A swipe is never the only way in.** `SwipeRow` reveals a row's secondary actions under a finger;
+the same actions must also be one press away, in a `RowMenu` on the row (or inline buttons where
+there is room). The revealed strip is inert until uncovered, so a keyboard or screen reader uses
+the menu.
+
+```tsx
+const actions: RowMenuItem[] = [
+  {key: "edit", label: "Editar", onSelect: openEdit},
+  {key: "del", label: "Excluir", destructive: true, onSelect: confirmDelete},   // open a confirmation
+]
+
+<li>
+  <SwipeRow actions={actions}>                {/* the front: opaque, it covers the actions */}
+    <div className="flex items-center gap-3 py-2.5">
+      <span className="flex-1">Aluguel</span>
+      <RowMenu label="Mais ações: Aluguel" items={actions} />
+    </div>
+  </SwipeRow>
+</li>
+```
+
+- The gesture locks to an axis after 8px (the row sets `touch-action: pan-y`, so a vertical drag
+  stays the page's scroll), opens past 35% of the revealed width and snaps back otherwise, keeps
+  one row open per page, and closes on a press elsewhere or Escape. It follows
+  `prefers-reduced-motion`.
+- A drag never eats the next tap; a second finger, a cancelled gesture, lost pointer capture or the
+  window losing focus returns the row to rest.
+- Phones only by default (`media="(max-width: 39.999rem)"`); `media={null}` swipes everywhere.
+- For a custom layout, `useSwipeReveal(width, {enabled, media})` returns `{open, active, rowId,
+  offset, dragging, close, bind}`: put `data-swipe-row={rowId}` on the row's root and spread `bind`
+  on the part that slides.
 
 Deliberately small. Components arrive when a second app needs one, not in anticipation — the whole
 point of extracting this was to stop maintaining four copies, and a component with one consumer is

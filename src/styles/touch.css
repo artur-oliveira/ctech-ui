@@ -1,0 +1,101 @@
+/*
+ * Touch: a compact control keeps its compact LOOK and gets a 44px TARGET.
+ *
+ * A compact surface (`data-density="compact"`) draws controls at 32px for a
+ * mouse. Under a finger (a coarse pointer at any width, or any viewport under
+ * Tailwind's `sm`) that is too small to hit, and drawing every control at 44px
+ * makes a phone screen mostly chrome. So under touch a compact control is
+ * DRAWN at 36px (`--touch-visual`) and HIT at 44px (`--touch-target`): an
+ * invisible `::after` centred on it.
+ *
+ * - The hit area only grows on an axis where the control is short of 44px, and
+ *   sideways by at most 4px past its edge (`--touch-reach`) per side. Keep 8px (`gap-2`)
+ *   between neighbouring controls, in a row or a stack: two extensions then
+ *   meet and never overlap. With less, the later control in the DOM wins the
+ *   overlap, so its neighbour loses taps near the shared edge.
+ * - An icon button stays square: drawn 36 x 36, hit 44 x 44.
+ * - Segments touch each other, so theirs grow up and down only
+ *   (segmented.tsx draws that hit area at every density).
+ * - An input cannot carry an `::after`. A Field's label already focuses its
+ *   input, so the label's `::after` covers the field BEHIND its content
+ *   (z-index -1 in an isolated field): a link or a button in the hint or error
+ *   stays on top and keeps its own taps.
+ * - Select options and menu items stay 44px rows: a list of targets with no gap
+ *   needs its rows to be the targets.
+ *
+ * Roots: any `[data-density="compact"]` — a ThemeProvider or DensityScope, and
+ * the portals of Drawer, Modal, Select and RowMenu, which forward the density of
+ * the surface that opened them. Keyed on the `data-slot` every control carries;
+ * anything else drawn as a control (a link styled as a button, a tab) opts in
+ * with the class `touch-target`. Unlayered on purpose: it must beat the density
+ * utilities (`in-data-[density=compact]:h-8`) in Tailwind's utilities layer.
+ */
+:where(:root, [data-ctech-theme]) {
+  --touch-visual: 2.25rem;
+  --touch-target: 2.75rem;
+  /* 4px past the control's edge, measured from inside its 1px border (an
+     `::after` is placed against the padding box). */
+  --touch-reach: calc(0.25rem + 1px);
+}
+
+@media (pointer: coarse), (max-width: 39.999rem) {
+  [data-density="compact"] :is([data-slot="button"], [data-slot="input"], [data-slot="select-trigger"], [data-slot="date-picker-trigger"]) {
+    height: var(--touch-visual);
+  }
+
+  [data-density="compact"] :is([data-slot="button"], [data-slot="select-trigger"], [data-slot="date-picker-trigger"]) {
+    min-width: var(--touch-visual);
+  }
+
+  [data-density="compact"] .touch-target {
+    min-height: var(--touch-visual);
+  }
+
+  /* Square, not 32 wide and 36 tall. */
+  [data-density="compact"] [data-slot="button"][data-size="icon"] {
+    width: var(--touch-visual);
+  }
+
+  /* The containing block for the hit area. An element the caller positions
+     (absolute, fixed, sticky) already is one, and keeps its own position. */
+  [data-density="compact"] :is([data-slot="button"], [data-slot="select-trigger"], [data-slot="date-picker-trigger"], .touch-target):not(.absolute, .fixed, .sticky) {
+    position: relative;
+  }
+
+  [data-density="compact"] :is([data-slot="button"], [data-slot="select-trigger"], [data-slot="date-picker-trigger"], .touch-target)::after {
+    content: "";
+    position: absolute;
+    /* Percentages resolve against the control itself: negative only while the
+       control is under 44px on that axis. Sideways growth is capped. */
+    top: min(0px, calc((100% - var(--touch-target)) / 2));
+    bottom: min(0px, calc((100% - var(--touch-target)) / 2));
+    left: max(calc(-1 * var(--touch-reach)), min(0px, calc((100% - var(--touch-target)) / 2)));
+    right: max(calc(-1 * var(--touch-reach)), min(0px, calc((100% - var(--touch-target)) / 2)));
+  }
+
+  /* 30px inside a 36px group, a finger wide. */
+  [data-density="compact"] [data-slot="segmented-item"] {
+    height: 1.875rem;
+    min-width: var(--touch-target);
+  }
+
+  [data-density="compact"] [data-slot="field"]:has(> [data-slot="input"]) {
+    position: relative;
+    isolation: isolate;
+  }
+  [data-density="compact"] [data-slot="field"]:has(> [data-slot="input"]) > label::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+
+  [data-density="compact"] :is([data-slot="select-item"], [data-slot="menu-item"]) {
+    min-height: var(--touch-target);
+  }
+
+  /* A switch, checkbox or radio is drawn small; its (flex) label is the target. */
+  [data-density="compact"] label:has(> :is([data-slot="switch"], [data-slot="checkbox"], [data-slot="radio"])) {
+    min-height: var(--touch-target);
+  }
+}

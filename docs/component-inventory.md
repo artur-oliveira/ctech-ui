@@ -8,9 +8,10 @@ Um componente entra em `@aoctech/ui` quando pelo menos dois produtos precisam do
 
 | Grupo | Componentes |
 |---|---|
-| Tema | `ThemeProvider`, cinco temas CTech, densidade, tokens core e semânticos |
-| Ações | `Button` |
-| Formulários | `Field`, `Input`, `Checkbox`, `Radio`/`RadioGroup`, `Switch`, `DatePicker`/`Calendar` |
+| Tema | `ThemeProvider`, `DensityScope`, cinco temas CTech, densidade, tokens core e semânticos, alvo de toque (`touch.css`) |
+| Ações | `Button`, `Segmented`, `RowMenu` |
+| Formulários | `Field`, `Input`, `Select`, `Checkbox`, `Radio`/`RadioGroup`, `Switch`, `DatePicker`/`Calendar` |
+| Listas | `SwipeRow`/`useSwipeReveal` (sempre com `RowMenu`: o gesto nunca é o único caminho) |
 | Feedback | `Alert`, `Badge`, `Skeleton`, `EmptyState` |
 | Estrutura | `PageHeader`, `Separator` |
 | Overlay | `Modal` e `Drawer` baseados em Base UI |
@@ -18,7 +19,7 @@ Um componente entra em `@aoctech/ui` quando pelo menos dois produtos precisam do
 
 ## Próximas extrações — condicionadas a dois consumidores
 
-1. Select, Combobox e Textarea.
+1. Combobox e Textarea.
 2. Tooltip, Popover, DropdownMenu genérico, Toast e ConfirmDialog.
 3. Tabs, Pagination, Breadcrumb e a navegação lateral de desktop (a de mobile já é `BottomNav`).
 4. DataTable, filtros, seleção em lote e estados de lista.

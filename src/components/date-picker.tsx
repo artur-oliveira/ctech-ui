@@ -133,6 +133,7 @@ function DatePicker({
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger
         id={id}
+        data-slot="date-picker-trigger"
         disabled={disabled}
         className={cn(
           "flex h-11 w-full items-center justify-between rounded-lg border border-border bg-background px-3 text-left text-sm outline-none",
