@@ -18,4 +18,12 @@ describe("Steps", () => {
     expect(screen.getByText("Concluído")).toBeTruthy()
     expect(screen.queryByText("depois", {exact: false})).toBeTruthy()
   })
+
+  it("draws the current step's number in white on the brand fill, as Button's brand variant", () => {
+    render(<Steps label="L" items={[{id: "a", title: "A", state: "current", stateLabel: "Agora"}]}/>)
+    const marker = screen.getByText("1")
+    expect(marker.className).toContain("text-white")
+    expect(marker.className).not.toContain("text-background")
+  })
 })
+

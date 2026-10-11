@@ -21,8 +21,8 @@ interface StepsProps {
 }
 
 const marker: Record<StepState, string> = {
-  done: "bg-success text-background border-success",
-  current: "bg-brand-600 text-background border-brand-600",
+  done: "bg-success text-white border-success",
+  current: "bg-brand-600 text-white border-brand-600",
   waiting: "bg-surface text-warning border-warning",
   upcoming: "bg-background text-muted-foreground border-border",
 }

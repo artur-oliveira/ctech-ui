@@ -159,7 +159,7 @@ so a badge renders what the server said rather than a client-side mapping of an 
 | `RowMenu` | A row's visible "⋯" menu (Base UI `Menu`). Default name "Mais ações" / "More actions". Since 0.4.0. |
 | `SwipeRow` + `useSwipeReveal` | Swipe left to reveal a row's actions, on a phone. Always paired with `RowMenu`. Since 0.4.0; 0.4.1 fixes a touch swipe cancelled when it started on a child of the row. |
 | `Steps` | Guided checklist: an ordered list whose current step is `aria-current="step"`; each step's state is spoken (`stateLabel`) and only the current and waiting steps show their content. No copy of its own. Since 0.5.0. |
-| `FileDrop` | One file, dropped or chosen: checks the extension (`accept`) and `maxBytes` before `onFile`, never reads the content; 44 px controls, every string a prop. Since 0.5.0. |
+| `FileDrop` | One file, dropped or chosen: checks `accept` (dot-extensions against the name, MIME types and `type/*` against the file type; prefer extensions for PEM) and `maxBytes` before `onFile`, never reads the content. The file input is the keyboard control and its description names the chosen file; Remove returns focus to it. 44 px controls, every string a prop. Since 0.5.0. |
 | `DensityScope` | A compact (or comfortable) surface whose overlays follow it. Since 0.4.0. |
 
 ### Navigation: `BottomNav` and `UserMenu`
