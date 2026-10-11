@@ -16,6 +16,8 @@ import {Skeleton as SkeletonComponent} from "./components/skeleton"
 import {Radio as RadioComponent, RadioGroup as RadioGroupComponent} from "./components/radio"
 import {Switch as SwitchComponent} from "./components/switch"
 import {ThemeProvider as ThemeProviderComponent} from "./components/theme-provider"
+import {Steps as StepsComponent} from "./components/steps"
+import {FileDrop as FileDropComponent} from "./components/file-drop"
 
 function StateCoverage() {
   return <main className="mx-auto max-w-5xl space-y-10"><header><h1 className="text-2xl font-semibold tracking-[-0.02em]">Component states</h1><p className="mt-2 text-sm text-muted-foreground">Os mesmos contratos de estado, foco e densidade em todos os temas.</p></header><section className="space-y-4"><h2 className="text-base font-semibold">Ações</h2><div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap"><ButtonComponent>Continuar</ButtonComponent><ButtonComponent variant="outline">Secundária</ButtonComponent><ButtonComponent variant="ghost">Neutra</ButtonComponent><ButtonComponent variant="danger">Excluir</ButtonComponent><ButtonComponent disabled>Indisponível</ButtonComponent></div></section><section className="grid gap-6 md:grid-cols-2"><FieldComponent label="E-mail" htmlFor="email" hint="Usaremos apenas para contato."><InputComponent id="email" type="email" placeholder="nome@empresa.com" /></FieldComponent><FieldComponent label="Código fiscal" htmlFor="code" error="Informe um código válido."><InputComponent id="code" aria-invalid="true" aria-describedby="code-error" defaultValue="ABC" /></FieldComponent></section><section className="space-y-4"><h2 className="text-base font-semibold">Feedback</h2><div className="flex flex-wrap gap-2"><BadgeComponent tone="neutral">Pendente</BadgeComponent><BadgeComponent tone="positive">Concluído</BadgeComponent><BadgeComponent tone="attention">Atenção</BadgeComponent><BadgeComponent tone="urgent">Urgente</BadgeComponent></div><AlertComponent tone="success" title="Alterações salvas">Sua configuração foi atualizada.</AlertComponent></section></main>
@@ -80,3 +82,20 @@ function DrawerExample() {
 }
 
 export const Drawer: StoryObj = {render: () => <DrawerExample />}
+
+function StepsExample() {
+  return <main className="mx-auto max-w-xl"><StepsComponent label="Conectar a conta" items={[
+    {id: "req", title: "Requisitos", state: "done", stateLabel: "Concluído"},
+    {id: "create", title: "Criar a integração", state: "done", stateLabel: "Concluído"},
+    {id: "wait", title: "Em validação", state: "waiting", stateLabel: "Aguardando desde 10/10", content: <p className="text-muted-foreground">O banco avisa por e-mail quando a análise terminar.</p>},
+    {id: "send", title: "Enviar as credenciais", state: "upcoming", stateLabel: "Depois"},
+  ]} /></main>
+}
+
+function FileDropExample() {
+  const [file, setFile] = useState<File | null>(null)
+  return <main className="mx-auto grid max-w-xl gap-6"><FileDropComponent id="story-crt" label="Certificado (.crt)" hint="Até 16 KB." accept=".crt,.pem" maxBytes={16384} file={file} onFile={setFile} chooseLabel="Escolher arquivo" replaceLabel="Trocar" removeLabel="Remover" tooLargeLabel="O arquivo passa de 16 KB." wrongTypeLabel="Envie um arquivo .crt ou .pem." /><FileDropComponent id="story-key" label="Chave (.key)" error="Envie a chave do mesmo certificado." accept=".key,.pem" maxBytes={16384} file={new File(["x"], "integracao.key")} onFile={() => {}} chooseLabel="Escolher arquivo" replaceLabel="Trocar" removeLabel="Remover" tooLargeLabel="O arquivo passa de 16 KB." wrongTypeLabel="Envie um arquivo .key ou .pem." /></main>
+}
+
+export const Steps: StoryObj = {render: () => <StepsExample />}
+export const FileDrop: StoryObj = {render: () => <FileDropExample />, name: "File Drop"}

@@ -57,3 +57,5 @@ export {
   type SwipeRevealOptions,
   type SwipeRowProps,
 } from "./components/swipe-row"
+export {Steps, type StepItem, type StepsProps, type StepState} from "./components/steps"
+export {FileDrop, type FileDropProps} from "./components/file-drop"
