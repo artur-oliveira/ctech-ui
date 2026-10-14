@@ -2,7 +2,7 @@
 
 import {Avatar} from "@base-ui/react/avatar"
 import {Menu} from "@base-ui/react/menu"
-import type {ReactNode} from "react"
+import {Fragment, type ReactNode} from "react"
 
 import {cn} from "../lib/cn"
 import {DEFAULT_LOCALE, getUserMenuLabels, type Locale, type UserMenuLabels} from "../lib/i18n"
@@ -38,6 +38,12 @@ interface UserMenuItem extends UserMenuTarget {
   icon?: ReactNode
 }
 
+/** A named set of choices with one current (e.g. Modo: Produção / Teste). */
+interface UserMenuGroup {
+  label: string
+  options: UserMenuView[]
+}
+
 interface UserMenuProps {
   /** Full name, shown whole in the menu and turned into initials on the avatar. */
   name: string
@@ -46,6 +52,10 @@ interface UserMenuProps {
   imageUrl?: string
   /** A view switcher section (e.g. Portal / Console). Omitted when empty. */
   views?: UserMenuView[]
+  /** Named choices after the views, each with its current option checked. */
+  groups?: UserMenuGroup[]
+  /** "avatar" (default) is the avatar alone; "row" adds the name and e-mail beside it (a sidebar's foot). */
+  trigger?: "avatar" | "row"
   /** Extra actions between the views and sign-out. */
   items?: UserMenuItem[]
   /** Renders the sign-out item when given. */
@@ -99,6 +109,8 @@ function UserMenu({
   email,
   imageUrl,
   views = [],
+  groups = [],
+  trigger = "avatar",
   items = [],
   onSignOut,
   renderLink = defaultRenderLink,
@@ -146,11 +158,16 @@ function UserMenu({
     <Menu.Root>
       <Menu.Trigger
         aria-label={`${text.trigger}: ${name}`}
+        data-trigger={trigger}
         className={cn(
           "inline-flex size-11 shrink-0 items-center justify-center rounded-full outline-none",
           "in-data-[density=compact]:size-8",
           "transition-shadow duration-150 motion-reduce:transition-none",
           "hover:ring-2 hover:ring-border focus-visible:ring-3 focus-visible:ring-ring/50 data-[popup-open]:ring-2 data-[popup-open]:ring-ring/50",
+          // The row: avatar plus who, the whole width of a sidebar's foot. The
+          // name is cut here (it is whole in the menu), the avatar never is.
+          trigger === "row" &&
+            "md:size-auto md:w-full md:justify-start md:gap-2.5 md:rounded-lg md:p-1.5 md:text-left md:hover:bg-background md:hover:ring-0 md:data-[popup-open]:bg-background md:data-[popup-open]:ring-0 md:in-data-[density=compact]:size-auto",
           className
         )}
       >
@@ -160,6 +177,12 @@ function UserMenu({
           imageUrl={imageUrl}
           className="size-9 text-sm in-data-[density=compact]:size-8 in-data-[density=compact]:text-xs"
         />
+        {trigger === "row" && (
+          <span className="hidden min-w-0 flex-1 md:block">
+            <span className="block truncate text-sm/5 font-medium text-foreground">{name}</span>
+            {email && <span className="block truncate text-xs/4 text-muted-foreground">{email}</span>}
+          </span>
+        )}
       </Menu.Trigger>
       <Menu.Portal data-ctech-theme={theme} data-density={density}>
         <Menu.Positioner sideOffset={8} align={align} collisionPadding={8} className="z-50 outline-none">
@@ -192,6 +215,18 @@ function UserMenu({
                 </Menu.Group>
               </>
             )}
+
+            {groups.map(group => (
+              <Fragment key={group.label}>
+                <Menu.Separator className="-mx-1.5 my-1 h-px bg-border" />
+                <Menu.Group>
+                  <Menu.GroupLabel className="px-3 pt-1.5 pb-1 text-xs font-medium text-muted-foreground">{group.label}</Menu.GroupLabel>
+                  {group.options.map(option =>
+                    renderEntry(option, option.current ? <CheckGlyph /> : <span aria-hidden className="size-4 shrink-0" />, option.current)
+                  )}
+                </Menu.Group>
+              </Fragment>
+            ))}
 
             {items.length > 0 && (
               <>
@@ -241,4 +276,4 @@ function PersonGlyph() {
   )
 }
 
-export {UserMenu, initialsOf, type UserMenuItem, type UserMenuProps, type UserMenuView}
+export {UserMenu, initialsOf, type UserMenuGroup, type UserMenuItem, type UserMenuProps, type UserMenuView}

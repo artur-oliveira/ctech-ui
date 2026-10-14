@@ -49,6 +49,11 @@ const userMenuMessages = {
   en: {trigger: "Account menu", views: "Switch view", signOut: "Sign out"},
 } as const
 
+const appShellMessages = {
+  "pt-BR": {skip: "Pular para o conteúdo"},
+  en: {skip: "Skip to content"},
+} as const
+
 const rowMenuMessages = {
   "pt-BR": {trigger: "Mais ações"},
   en: {trigger: "More actions"},
@@ -78,6 +83,7 @@ type DatePickerLabels = {-readonly [K in keyof (typeof datePickerMessages)["en"]
 type ModalLabels = {-readonly [K in keyof (typeof modalMessages)["en"]]: string}
 type BottomNavLabels = {-readonly [K in keyof (typeof bottomNavMessages)["en"]]: string}
 type UserMenuLabels = {-readonly [K in keyof (typeof userMenuMessages)["en"]]: string}
+type AppShellLabels = {-readonly [K in keyof (typeof appShellMessages)["en"]]: string}
 type RowMenuLabels = {-readonly [K in keyof (typeof rowMenuMessages)["en"]]: string}
 type SelectLabels = {-readonly [K in keyof (typeof selectMessages)["en"]]: string}
 
@@ -95,6 +101,10 @@ function getBottomNavLabels(locale: Locale | undefined, overrides?: Partial<Bott
 
 function getUserMenuLabels(locale: Locale | undefined, overrides?: Partial<UserMenuLabels>): UserMenuLabels {
   return {...userMenuMessages[resolveCatalog(locale)], ...overrides}
+}
+
+function getAppShellLabels(locale: Locale | undefined, overrides?: Partial<AppShellLabels>): AppShellLabels {
+  return {...appShellMessages[resolveCatalog(locale)], ...overrides}
 }
 
 function getRowMenuLabels(locale: Locale | undefined, overrides?: Partial<RowMenuLabels>): RowMenuLabels {
@@ -118,7 +128,9 @@ export {
   getRowMenuLabels,
   getSelectLabels,
   getUserMenuLabels,
+  getAppShellLabels,
   resolveCatalog,
+  type AppShellLabels,
   type BottomNavLabels,
   type CatalogLocale,
   type DatePickerLabels,
