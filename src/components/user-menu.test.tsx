@@ -110,3 +110,25 @@ describe("UserMenu", () => {
     expect(screen.queryByRole("menuitem", {name: "Sign out"})).not.toBeInTheDocument()
   })
 })
+
+describe("UserMenu groups and the row trigger", () => {
+  it("lists a named group of choices with the current one checked", async () => {
+    const onTest = vi.fn()
+    const {user, trigger} = setup({
+      groups: [{label: "Modo", options: [{label: "Produção", current: true, onClick: vi.fn()}, {label: "Teste", onClick: onTest}]}],
+    })
+    await user.click(trigger)
+    const menu = await screen.findByRole("menu")
+    expect(within(menu).getByText("Modo")).toBeInTheDocument()
+    expect(within(menu).getByRole("menuitem", {name: "Produção"})).toHaveAttribute("aria-current", "true")
+    await user.click(within(menu).getByRole("menuitem", {name: "Teste"}))
+    expect(onTest).toHaveBeenCalled()
+  })
+
+  it("shows the name beside the avatar on the row trigger, and keeps the same accessible name", () => {
+    render(<UserMenu name="Ana Ribeiro" email="ana@example.com" trigger="row" />)
+    const trigger = screen.getByRole("button", {name: "Menu da conta: Ana Ribeiro"})
+    expect(trigger).toHaveTextContent("Ana Ribeiro")
+    expect(trigger).toHaveAttribute("data-trigger", "row")
+  })
+})

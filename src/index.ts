@@ -45,7 +45,8 @@ export {
   type BottomNavSheetItem,
   type BottomNavTab,
 } from "./components/bottom-nav"
-export {UserMenu, type UserMenuItem, type UserMenuProps, type UserMenuView} from "./components/user-menu"
+export {UserMenu, type UserMenuGroup, type UserMenuItem, type UserMenuProps, type UserMenuView} from "./components/user-menu"
+export {AppShell, SidebarNav, type AppShellProps, type SidebarNavGroup, type SidebarNavItem, type SidebarNavProps} from "./components/app-shell"
 export {RowMenu, type RowMenuItem, type RowMenuProps} from "./components/row-menu"
 export {Segmented, type SegmentedOption, type SegmentedProps} from "./components/segmented"
 export {Select, type SelectAction, type SelectOption, type SelectProps} from "./components/select"
