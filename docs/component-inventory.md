@@ -15,15 +15,15 @@ Um componente entra em `@aoctech/ui` quando pelo menos dois produtos precisam do
 | Feedback | `Alert`, `Badge`, `Skeleton`, `EmptyState` |
 | Estrutura | `PageHeader`, `Separator` |
 | Overlay | `Modal` e `Drawer` baseados em Base UI |
-| Navegação | `BottomNav` (mobile, com folha "Mais") e `UserMenu` (avatar, troca de visão, sair) |
+| Navegação | `AppShell` + `SidebarNav` (coluna fixa à esquerda a partir de `md`, barra no topo abaixo), `BottomNav` (mobile, com folha "Mais") e `UserMenu` (avatar ou linha, troca de visão, grupos de escolha como o modo, sair) |
 
 ## Próximas extrações — condicionadas a dois consumidores
 
 1. Combobox e Textarea.
 2. Tooltip, Popover, DropdownMenu genérico, Toast e ConfirmDialog.
-3. Tabs, Pagination, Breadcrumb e a navegação lateral de desktop (a de mobile já é `BottomNav`).
+3. Tabs, Pagination e Breadcrumb.
 4. DataTable, filtros, seleção em lote e estados de lista.
-5. AppShell e padrões de formulário multi-etapa.
+5. Padrões de formulário multi-etapa. (`AppShell` entrou na 0.6.0 por decisão do dono, 2026-10-14, com billing como primeiro consumidor e os outros produtos como alvo.)
 6. Uma tela de status compartilhada (título + descrição + ação + slot de wordmark) para 404/500/manutenção — hoje cada produto reimplementa a própria (ex.: `ctech-billing/ui/src/components/StatusScreen.tsx`), inclusive o único consumidor atual deste pacote.
 
 ## Não centralizar
