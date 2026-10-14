@@ -61,4 +61,4 @@ export {
 } from "./components/swipe-row"
 export {Steps, type StepItem, type StepsProps, type StepState} from "./components/steps"
 export {FileDrop, type FileDropProps} from "./components/file-drop"
-export {CommandPalette, type CommandEntry, type CommandPaletteProps} from "./components/command-palette"
+export {CommandPalette, CommandPaletteTrigger, useCommandPaletteShortcut, type CommandEntry, type CommandPaletteProps} from "./components/command-palette"

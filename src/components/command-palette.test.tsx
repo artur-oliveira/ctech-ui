@@ -1,9 +1,9 @@
-import {render, screen, within} from "@testing-library/react"
+import {fireEvent, render, screen, within} from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import {useState} from "react"
 import {describe, expect, it, vi} from "vitest"
 
-import {CommandPalette, type CommandEntry} from "./command-palette"
+import {CommandPalette, CommandPaletteTrigger, useCommandPaletteShortcut, type CommandEntry} from "./command-palette"
 
 const onNew = vi.fn()
 const ENTRIES: CommandEntry[] = [
@@ -104,5 +104,42 @@ describe("CommandPalette", () => {
   it("speaks English for an English locale", async () => {
     render(<CommandPalette entries={ENTRIES} open onOpenChange={() => {}} locale="en" />)
     expect(await screen.findByRole("combobox", {name: "Search the app"})).toBeInTheDocument()
+  })
+})
+
+function Shortcut({onToggle}: {onToggle: () => void}) {
+  useCommandPaletteShortcut(onToggle)
+  return <input aria-label="campo" />
+}
+
+describe("CommandPaletteTrigger", () => {
+  it("is a named button announcing the shortcut", async () => {
+    const onClick = vi.fn()
+    render(<CommandPaletteTrigger onClick={onClick} />)
+    const button = screen.getByRole("button", {name: "Buscar"})
+    await userEvent.click(button)
+    expect(onClick).toHaveBeenCalledTimes(1)
+    expect(button).toHaveAttribute("aria-keyshortcuts", "Control+K Meta+K")
+  })
+})
+
+describe("useCommandPaletteShortcut", () => {
+  it("toggles on Ctrl+K and Cmd+K, even from a field, and prevents the browser's own", () => {
+    const onToggle = vi.fn()
+    render(<Shortcut onToggle={onToggle} />)
+    screen.getByLabelText("campo").focus()
+    expect(fireEvent.keyDown(window, {key: "k", ctrlKey: true})).toBe(false)
+    fireEvent.keyDown(window, {key: "K", metaKey: true})
+    expect(onToggle).toHaveBeenCalledTimes(2)
+  })
+
+  it("ignores a plain k, Shift+Ctrl+K and a removed listener", () => {
+    const onToggle = vi.fn()
+    const {unmount} = render(<Shortcut onToggle={onToggle} />)
+    fireEvent.keyDown(window, {key: "k"})
+    fireEvent.keyDown(window, {key: "k", ctrlKey: true, shiftKey: true})
+    unmount()
+    fireEvent.keyDown(window, {key: "k", ctrlKey: true})
+    expect(onToggle).not.toHaveBeenCalled()
   })
 })

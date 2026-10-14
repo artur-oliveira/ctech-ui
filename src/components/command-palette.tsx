@@ -170,4 +170,48 @@ function Body({entries, limit, text, renderLink, close}: {entries: CommandEntry[
   )
 }
 
-export {CommandPalette, type CommandEntry, type CommandPaletteProps}
+function CommandPaletteTrigger({onClick, locale = DEFAULT_LOCALE, labels, className}: {onClick: () => void; locale?: Locale; labels?: Partial<CommandPaletteLabels>; className?: string}) {
+  const text = getCommandPaletteLabels(locale, labels)
+  const mac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform)
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={text.trigger}
+      aria-keyshortcuts="Control+K Meta+K"
+      className={cn(
+        "inline-flex h-8 items-center gap-2 rounded-lg border border-border bg-background px-2.5 text-sm text-muted-foreground outline-none",
+        "hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 touch:min-h-11 touch:min-w-11 touch:justify-center",
+        "max-sm:w-8 max-sm:justify-center max-sm:px-0 [&_svg]:size-4 [&_svg]:shrink-0",
+        className
+      )}
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" />
+      </svg>
+      <span className="max-sm:hidden">{text.trigger}</span>
+      <kbd className="rounded border border-border px-1.5 text-xs font-medium max-sm:hidden touch:hidden">{mac ? "⌘K" : "Ctrl K"}</kbd>
+    </button>
+  )
+}
+
+/** ⌘K / Ctrl+K anywhere, including from a field: the key is not typed text. */
+function useCommandPaletteShortcut(onToggle: () => void): void {
+  const ref = useRef(onToggle)
+  useEffect(() => {
+    ref.current = onToggle
+  })
+  useEffect(() => {
+    const onKeyDown = (e: globalThis.KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "k") {
+        e.preventDefault()
+        ref.current()
+      }
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [])
+}
+
+export {CommandPalette, CommandPaletteTrigger, useCommandPaletteShortcut, type CommandEntry, type CommandPaletteProps}
