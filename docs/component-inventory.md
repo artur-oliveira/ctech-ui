@@ -15,7 +15,7 @@ Um componente entra em `@aoctech/ui` quando pelo menos dois produtos precisam do
 | Feedback | `Alert`, `Badge`, `Skeleton`, `EmptyState` |
 | Estrutura | `PageHeader`, `Separator` |
 | Overlay | `Modal` e `Drawer` baseados em Base UI |
-| Navegação | `AppShell` + `SidebarNav` (coluna fixa à esquerda a partir de `md`, barra no topo abaixo), `BottomNav` (mobile, com folha "Mais") e `UserMenu` (avatar ou linha, troca de visão, grupos de escolha como o modo, sair) |
+| Navegação | `AppShell` + `SidebarNav` (barra no topo, rail de seções fixo à esquerda a partir de `md`), `BottomNav` (mobile, com folha "Mais") e `UserMenu` (avatar ou linha, troca de visão, grupos de escolha como o modo, sair) |
 
 ## Próximas extrações — condicionadas a dois consumidores
 
