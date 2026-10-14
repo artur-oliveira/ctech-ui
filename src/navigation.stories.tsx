@@ -2,6 +2,7 @@ import {useState} from "react"
 import type {Meta, StoryObj} from "@storybook/react-vite"
 
 import {BottomNav as BottomNavComponent, BottomNavSpacer} from "./components/bottom-nav"
+import {CommandPalette as CommandPaletteComponent, CommandPaletteTrigger, type CommandEntry} from "./components/command-palette"
 import {UserMenu as UserMenuComponent} from "./components/user-menu"
 
 /* Story-only glyphs; products pass their own icon set (lucide in billing/dfe). */
@@ -88,4 +89,25 @@ export const UserMenu: StoryObj = {
       />
     </div>
   ),
+}
+
+const PALETTE_ENTRIES: CommandEntry[] = [
+  {id: "f-bills", label: "Agenda", group: "Finanças", kind: "page", href: "#bills", keywords: ["contas a pagar", "boletos"]},
+  {id: "f-rec", label: "Recorrências", group: "Finanças", kind: "page", href: "#recurrences"},
+  {id: "f-rec-new", label: "Nova recorrência", group: "Finanças", kind: "action", onSelect: () => {}},
+  {id: "c-inv", label: "Faturas", group: "Console", kind: "page", href: "#invoices"},
+  {id: "c-price", label: "Novo preço", group: "Console", kind: "action", onSelect: () => {}},
+  {id: "p-inv", label: "Faturas", group: "Portal", kind: "page", href: "#portal-invoices"},
+]
+
+export const CommandPalette: StoryObj = {
+  render: function Render() {
+    const [open, setOpen] = useState(false)
+    return (
+      <div className="flex justify-end">
+        <CommandPaletteTrigger onClick={() => setOpen(true)} />
+        <CommandPaletteComponent entries={PALETTE_ENTRIES} open={open} onOpenChange={setOpen} />
+      </div>
+    )
+  },
 }
