@@ -9,6 +9,13 @@ describe("SidebarNav", () => {
     {label: "Integrações", items: [{href: "/webhooks", label: "Webhooks"}]},
   ]
 
+  it("draws the current section on the rail: its own edge, never colour alone", () => {
+    render(<SidebarNav label="Seções" groups={groups} />)
+    const current = screen.getByRole("link", {name: "Faturas"})
+    expect(current.className).toMatch(/border-l-2/)
+    expect(current.className).toMatch(/aria-\[current=page\]:font-medium/)
+  })
+
   it("is a labelled navigation with the current section marked by aria-current", () => {
     render(<SidebarNav label="Seções" groups={groups} />)
     const nav = screen.getByRole("navigation", {name: "Seções"})
@@ -29,11 +36,12 @@ describe("SidebarNav", () => {
 })
 
 describe("AppShell", () => {
-  it("places brand, context, sections and account in one column and the page in main", () => {
+  it("puts the mark, whose work, the actions and the person in the top bar, the sections in the column", () => {
     render(
       <AppShell
         brand={<span>CTech Billing</span>}
         context={<button type="button">CTech Tecnologia</button>}
+        actions={<button type="button">PT</button>}
         nav={<SidebarNav label="Seções" groups={[{items: [{href: "/a", label: "A"}]}]} />}
         account={<button type="button">Conta</button>}
         banner={<p>Modo de teste</p>}
@@ -41,14 +49,23 @@ describe("AppShell", () => {
         <h1>Faturas</h1>
       </AppShell>
     )
+    const bar = screen.getByRole("banner")
+    expect(within(bar).getByText("CTech Billing")).toBeInTheDocument()
+    for (const name of ["CTech Tecnologia", "PT", "Conta"]) expect(within(bar).getByRole("button", {name})).toBeInTheDocument()
     const column = screen.getByTestId("app-shell-sidebar")
-    for (const name of ["CTech Tecnologia", "Conta"]) expect(within(column).getByRole("button", {name})).toBeInTheDocument()
     expect(within(column).getByRole("navigation", {name: "Seções"})).toBeInTheDocument()
+    expect(within(column).queryByRole("button")).not.toBeInTheDocument()
     const main = screen.getByRole("main")
     expect(within(main).getByRole("heading", {name: "Faturas"})).toBeInTheDocument()
-    // The banner sits above the page, not inside the column.
+    // The banner spans the page under the bar, in neither the bar nor the column.
+    expect(within(bar).queryByText("Modo de teste")).not.toBeInTheDocument()
     expect(within(column).queryByText("Modo de teste")).not.toBeInTheDocument()
     expect(screen.getByText("Modo de teste")).toBeInTheDocument()
+  })
+
+  it("has no column when there are no sections", () => {
+    render(<AppShell brand="B" account={null}><p>x</p></AppShell>)
+    expect(screen.queryByTestId("app-shell-sidebar")).not.toBeInTheDocument()
   })
 
   it("offers a skip link to the page", () => {

@@ -1,33 +1,34 @@
-import type {ReactNode} from "react"
+import type {CSSProperties, ReactNode} from "react"
 
 import {cn} from "../lib/cn"
 import {DEFAULT_LOCALE, getAppShellLabels, type AppShellLabels, type Locale} from "../lib/i18n"
 import {defaultRenderLink, type RenderLink} from "../lib/link"
 
 /**
- * A product's frame: one column pinned to the left edge from `md` up, holding
- * the mark, the context the person works in (an organization, a space), the
- * sections and the person; the page takes the rest of the width. Under `md`
- * the same column is a bar across the top (the sections move to the product's
- * `BottomNav`), so every slot is rendered once and nothing is duplicated for
- * a breakpoint.
+ * A product's frame, the CTech family's grammar (ctech-account, ctech-wallet):
+ * a bar across the top with the mark at the left and, at the right, whose
+ * work this is, the product's actions (a language switch) and the person.
+ * Under it, from `md`, the sections in a column pinned to the left edge, and
+ * the page across the rest of the width: a wide screen gives its width to the
+ * page, where tables compare down a column, not to empty margins. On a phone
+ * the bar stays and the sections move to the product's `BottomNav`.
  *
- * The column is the width of its longest label and no wider, and it scrolls
- * on its own; a wide screen gives its extra width to the page, where tables
- * compare down a column. How wide a page reads is the page's decision
- * (`contentClassName`): a form or a detail keeps a reading width inside it.
+ * How wide a page reads is the page's decision (`contentClassName`): a form or
+ * a detail keeps a reading width inside it.
  */
 
 interface AppShellProps {
-  /** Mark and product name. */
+  /** Mark and product name, the bar's left end. */
   brand: ReactNode
-  /** Whose work this is (an organization or space switch). Under the brand; in the bar on a phone. */
+  /** Whose work this is (an organization or space switch), at the bar's right. */
   context?: ReactNode
-  /** The sections, usually `SidebarNav`. Not shown on a phone: that is the `BottomNav`'s job. */
+  /** The product's own controls beside the person (a language switch). */
+  actions?: ReactNode
+  /** The sections, usually `SidebarNav`. A column from `md`; none on a phone. */
   nav?: ReactNode
-  /** The person (`UserMenu trigger="row"`): the foot of the column, the end of the bar. */
+  /** The person (`UserMenu`), the bar's right end. */
   account: ReactNode
-  /** Full-width notice above the page (a test-mode band). Never inside the column. */
+  /** Full-width notice under the bar (a test-mode band). */
   banner?: ReactNode
   /** The phone's navigation; rendered after the page. */
   bottomNav?: ReactNode
@@ -40,10 +41,13 @@ interface AppShellProps {
 }
 
 const MAIN_ID = "app-shell-main"
+/** The bar's height; the column sticks right under it. */
+const BAR = "3.5rem"
 
 function AppShell({
   brand,
   context,
+  actions,
   nav,
   account,
   banner,
@@ -56,34 +60,38 @@ function AppShell({
 }: AppShellProps) {
   const text = getAppShellLabels(locale, labels)
   return (
-    <div data-slot="app-shell" className={cn("min-h-dvh bg-background text-foreground md:flex", className)}>
+    <div data-slot="app-shell" className={cn("flex min-h-dvh flex-col bg-background text-foreground", className)} style={{"--app-shell-bar": BAR} as CSSProperties}>
       <a
         href={`#${MAIN_ID}`}
         className="sr-only z-50 rounded-md bg-background px-3 py-2 text-sm font-medium focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:ring-3 focus:ring-ring/50"
       >
         {text.skip}
       </a>
-      <aside
-        data-testid="app-shell-sidebar"
-        className={cn(
-          "sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-background px-4 py-2",
-          "md:h-dvh md:w-60 md:shrink-0 md:flex-col md:items-stretch md:gap-0 md:overflow-y-auto md:border-r md:border-b-0 md:bg-surface md:px-3 md:py-3"
-        )}
-      >
-        <div className="flex min-h-10 shrink-0 items-center md:px-2">{brand}</div>
-        {context && <div className="min-w-0 flex-1 md:mt-3 md:flex-none">{context}</div>}
-        {nav && <div className="hidden md:mt-4 md:block">{nav}</div>}
-        <div className={cn("shrink-0 md:mt-auto md:border-t md:border-border md:pt-3", !context && "ml-auto md:ml-0")}>
-          {account}
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="flex h-(--app-shell-bar) items-center gap-3 px-4 lg:px-6">
+          <div className="flex min-w-0 shrink-0 items-center">{brand}</div>
+          <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-2 sm:flex-none">
+            {context && <div className="min-w-0 flex-1 sm:w-60 sm:flex-none">{context}</div>}
+            {actions}
+            {account}
+          </div>
         </div>
-      </aside>
-      <div className="min-w-0 flex-1">
-        {banner}
-        <main id={MAIN_ID} tabIndex={-1} className={cn("mx-auto w-full max-w-[96rem] px-4 py-6 outline-none sm:px-6 lg:px-10 lg:py-8", contentClassName)}>
+      </header>
+      {banner}
+      <div className="flex flex-1">
+        {nav && (
+          <aside
+            data-testid="app-shell-sidebar"
+            className="sticky top-(--app-shell-bar) hidden h-[calc(100dvh-var(--app-shell-bar))] w-56 shrink-0 overflow-y-auto px-4 py-8 md:block lg:w-60 lg:px-6"
+          >
+            {nav}
+          </aside>
+        )}
+        <main id={MAIN_ID} tabIndex={-1} className={cn("w-full min-w-0 max-w-[96rem] px-4 py-6 outline-none sm:px-6 md:py-8 lg:px-10", contentClassName)}>
           {children}
         </main>
-        {bottomNav}
       </div>
+      {bottomNav}
     </div>
   )
 }
@@ -110,23 +118,25 @@ interface SidebarNavProps {
   className?: string
 }
 
+/** A rail: the list's left edge is a hairline, and the current section draws
+ *  its own stretch of it in the brand colour, with weight. */
 const ITEM = cn(
-  "flex min-h-10 items-center gap-2.5 rounded-lg px-2 text-sm text-muted-foreground outline-none",
+  "-ml-px flex min-h-9 items-center gap-2.5 border-l-2 border-transparent pl-3 text-sm text-muted-foreground outline-none",
   "in-data-[density=compact]:min-h-8",
   "transition-colors duration-150 motion-reduce:transition-none",
-  "hover:bg-background hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
-  "aria-[current=page]:bg-brand-50 aria-[current=page]:font-medium aria-[current=page]:text-brand-700",
+  "hover:border-border hover:text-foreground focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring/50",
+  "aria-[current=page]:border-brand-600 aria-[current=page]:font-medium aria-[current=page]:text-foreground",
   "[&_svg]:size-4 [&_svg]:shrink-0"
 )
 
-/** The column's sections. "Current" is a fill and a weight, never colour alone. */
+/** The column's sections on a rail. "Current" is an edge and a weight, never colour alone. */
 function SidebarNav({label, groups, renderLink = defaultRenderLink, className}: SidebarNavProps) {
   return (
-    <nav aria-label={label} className={cn("flex flex-col gap-4", className)}>
+    <nav aria-label={label} className={cn("flex flex-col gap-5", className)}>
       {groups.map((group, i) => (
         <div key={group.label ?? i}>
-          {group.label && <p className="m-0 px-2 pb-1 text-xs font-medium text-muted-foreground">{group.label}</p>}
-          <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
+          {group.label && <p className="m-0 pb-1.5 pl-3.5 text-xs text-muted-foreground">{group.label}</p>}
+          <ul className="m-0 flex list-none flex-col gap-0.5 border-l border-border p-0">
             {group.items.map(item => (
               <li key={item.href}>
                 {renderLink({
