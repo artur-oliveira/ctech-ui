@@ -1,7 +1,7 @@
 "use client"
 
 import {Dialog} from "@base-ui/react/dialog"
-import {useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode} from "react"
+import {useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent, type ReactNode} from "react"
 
 import {cn} from "../lib/cn"
 import {DEFAULT_LOCALE, getCommandPaletteLabels, type CommandPaletteLabels, type Locale} from "../lib/i18n"
@@ -71,11 +71,15 @@ function CommandPalette({entries, open, onOpenChange, renderLink = defaultRender
 
 function Body({entries, limit, text, renderLink, close}: {entries: CommandEntry[]; limit: number; text: CommandPaletteLabels; renderLink: RenderLink; close: () => void}) {
   const [query, setQuery] = useState("")
-  const [cursor, setCursor] = useState(0)
+  // The highlight follows an entry, not a position: when entries arrive while
+  // the palette is open (a session answering), Enter still picks what the
+  // person was looking at.
+  const [activeId, setActiveId] = useState<string | null>(null)
   const listId = useId()
   const refs = useRef<(HTMLElement | null)[]>([])
   const results = useMemo(() => matchEntries(entries, query, limit), [entries, query, limit])
-  const at = results.length === 0 ? -1 : Math.min(cursor, results.length - 1)
+  const found = results.findIndex(r => r.id === activeId)
+  const at = results.length === 0 ? -1 : Math.max(found, 0)
 
   useEffect(() => {
     refs.current[at]?.scrollIntoView?.({block: "nearest"})
@@ -85,10 +89,10 @@ function Body({entries, limit, text, renderLink, close}: {entries: CommandEntry[
     if (results.length === 0) return
     if (e.key === "ArrowDown") {
       e.preventDefault()
-      setCursor((at + 1) % results.length)
+      setActiveId(results[(at + 1) % results.length].id)
     } else if (e.key === "ArrowUp") {
       e.preventDefault()
-      setCursor((at - 1 + results.length) % results.length)
+      setActiveId(results[(at - 1 + results.length) % results.length].id)
     } else if (e.key === "Enter") {
       e.preventDefault()
       refs.current[at]?.click()
@@ -103,7 +107,7 @@ function Body({entries, limit, text, renderLink, close}: {entries: CommandEntry[
           autoFocus
           role="combobox"
           aria-label={text.dialog}
-          aria-expanded
+          aria-expanded={results.length > 0}
           aria-controls={listId}
           aria-autocomplete="list"
           aria-activedescendant={at >= 0 ? `${listId}-${at}` : undefined}
@@ -113,18 +117,16 @@ function Body({entries, limit, text, renderLink, close}: {entries: CommandEntry[
           placeholder={text.placeholder}
           onChange={e => {
             setQuery(e.target.value)
-            setCursor(0)
+            setActiveId(null)
           }}
           onKeyDown={onKeyDown}
           className="h-12 w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground md:text-sm"
         />
       </div>
+      <p role="status" className={results.length === 0 ? "m-0 px-3 py-6 text-center text-sm text-muted-foreground" : "sr-only"}>
+        {results.length === 0 ? <>{text.empty} <b className="text-foreground">{query}</b></> : ""}
+      </p>
       <ul id={listId} role="listbox" aria-label={text.results} className="m-0 max-h-80 list-none overflow-y-auto p-1.5">
-        {results.length === 0 && (
-          <li role="presentation" className="px-3 py-6 text-center text-sm text-muted-foreground">
-            {text.empty} <b className="text-foreground">{query}</b>
-          </li>
-        )}
         {results.map((entry, i) => {
           const heading = grouped && (i === 0 || results[i - 1].group !== entry.group)
           const body = (
@@ -132,7 +134,9 @@ function Body({entries, limit, text, renderLink, close}: {entries: CommandEntry[
               {entry.icon && <span className="text-muted-foreground" aria-hidden>{entry.icon}</span>}
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-medium">{entry.label}</span>
-                {!grouped && <span className="block truncate text-xs text-muted-foreground">{entry.group}</span>}
+                {grouped
+                  ? <span className="sr-only">{entry.group}</span>
+                  : <span className="block truncate text-xs text-muted-foreground">{entry.group}</span>}
               </span>
               {entry.kind === "action" && <span className="shrink-0 text-xs text-muted-foreground">{text.action}</span>}
             </>
@@ -142,7 +146,10 @@ function Body({entries, limit, text, renderLink, close}: {entries: CommandEntry[
             role: "option",
             "aria-selected": i === at,
             className: ROW,
-            onMouseEnter: () => setCursor(i),
+            // Pointer movement, not entry: arrowing scrolls rows under a resting
+            // pointer, and an enter event would hand the highlight back to it.
+            onMouseMove: () => { if (i !== at) setActiveId(entry.id) },
+            tabIndex: -1,
           } as const
           return (
             <li key={entry.id} role="presentation">
@@ -170,9 +177,13 @@ function Body({entries, limit, text, renderLink, close}: {entries: CommandEntry[
   )
 }
 
+const noSubscribe = () => () => {}
+const isApplePlatform = () => /Mac|iPhone|iPad/.test(navigator.userAgent)
+
 function CommandPaletteTrigger({onClick, locale = DEFAULT_LOCALE, labels, className}: {onClick: () => void; locale?: Locale; labels?: Partial<CommandPaletteLabels>; className?: string}) {
   const text = getCommandPaletteLabels(locale, labels)
-  const mac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform)
+  // The server (and a static export) renders "Ctrl K"; a Mac client switches after hydrating.
+  const mac = useSyncExternalStore(noSubscribe, isApplePlatform, () => false)
   return (
     <button
       type="button"
@@ -206,7 +217,7 @@ function useCommandPaletteShortcut(onToggle: () => void): void {
     const onKeyDown = (e: globalThis.KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "k") {
         e.preventDefault()
-        ref.current()
+        if (!e.repeat) ref.current()
       }
     }
     window.addEventListener("keydown", onKeyDown)

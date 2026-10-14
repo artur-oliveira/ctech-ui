@@ -31,7 +31,7 @@ describe("CommandPalette", () => {
     const input = await screen.findByRole("combobox", {name: "Buscar no aplicativo"})
     expect(input).toHaveFocus()
     expect(input).toHaveAttribute("aria-expanded", "true")
-    expect(screen.getByText("Portal")).toBeInTheDocument()
+    expect(screen.getAllByText("Portal").length).toBeGreaterThan(0)
     expect(options()).toHaveLength(4)
   })
 
@@ -141,5 +141,60 @@ describe("useCommandPaletteShortcut", () => {
     unmount()
     fireEvent.keyDown(window, {key: "k", ctrlKey: true})
     expect(onToggle).not.toHaveBeenCalled()
+  })
+})
+
+describe("CommandPalette, keyboard and screen readers", () => {
+  it("keeps the highlighted entry when the entries change under it", async () => {
+    const user = userEvent.setup()
+    const {rerender} = render(<CommandPalette entries={ENTRIES} open onOpenChange={() => {}} />)
+    await user.type(await screen.findByRole("combobox"), "rec")
+    await user.keyboard("{ArrowDown}")
+    expect(screen.getByRole("option", {name: /Nova recorrência/})).toHaveAttribute("aria-selected", "true")
+    const earlier: CommandEntry = {id: "rec-0", label: "Recorrências antigas", group: "Finanças", kind: "page", href: "/old"}
+    rerender(<CommandPalette entries={[earlier, ...ENTRIES]} open onOpenChange={() => {}} />)
+    expect(screen.getByRole("option", {name: /Nova recorrência/})).toHaveAttribute("aria-selected", "true")
+  })
+
+  it("options are not tab stops: Tab leaves the combobox, it does not walk the rows", async () => {
+    render(<Harness />)
+    await screen.findByRole("combobox")
+    for (const option of screen.getAllByRole("option")) expect(option).toHaveAttribute("tabindex", "-1")
+  })
+
+  it("says the list is collapsed when there is nothing to choose, and announces it", async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+    const input = await screen.findByRole("combobox")
+    await user.type(input, "zzzz")
+    expect(input).toHaveAttribute("aria-expanded", "false")
+    expect(screen.getByRole("status")).toHaveTextContent(/Nada encontrado para/)
+  })
+
+  it("an option names its group for a screen reader when the list is grouped", async () => {
+    render(<Harness />)
+    const option = await screen.findByRole("option", {name: /Faturas/})
+    expect(option).toHaveAccessibleName(/Portal/)
+  })
+
+  it("a resting pointer does not steal the highlight while arrowing", async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+    await screen.findByRole("combobox")
+    await user.hover(screen.getAllByRole("option")[0])
+    await user.keyboard("{ArrowDown}")
+    fireEvent.mouseEnter(screen.getAllByRole("option")[0])
+    expect(screen.getAllByRole("option")[1]).toHaveAttribute("aria-selected", "true")
+  })
+})
+
+describe("useCommandPaletteShortcut, held key", () => {
+  it("ignores key repeat: holding Ctrl+K does not flicker the palette", () => {
+    const onToggle = vi.fn()
+    render(<Shortcut onToggle={onToggle} />)
+    fireEvent.keyDown(window, {key: "k", ctrlKey: true})
+    fireEvent.keyDown(window, {key: "k", ctrlKey: true, repeat: true})
+    fireEvent.keyDown(window, {key: "k", ctrlKey: true, repeat: true})
+    expect(onToggle).toHaveBeenCalledTimes(1)
   })
 })
