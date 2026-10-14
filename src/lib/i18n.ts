@@ -64,6 +64,27 @@ const selectMessages = {
   en: {placeholder: "Select…", none: "None"},
 } as const
 
+const commandPaletteMessages = {
+  "pt-BR": {
+    dialog: "Buscar no aplicativo",
+    placeholder: "Buscar telas e ações…",
+    empty: "Nada encontrado para",
+    action: "Ação",
+    trigger: "Buscar",
+    results: "Resultados",
+    close: "Fechar",
+  },
+  en: {
+    dialog: "Search the app",
+    placeholder: "Search screens and actions…",
+    empty: "Nothing found for",
+    action: "Action",
+    trigger: "Search",
+    results: "Results",
+    close: "Close",
+  },
+} as const
+
 const errorMessages = {
   "pt-BR": {
     400: {title: "Não foi possível abrir este endereço", description: "Confira os parâmetros do link ou volte ao início para continuar."},
@@ -85,6 +106,7 @@ type BottomNavLabels = {-readonly [K in keyof (typeof bottomNavMessages)["en"]]:
 type UserMenuLabels = {-readonly [K in keyof (typeof userMenuMessages)["en"]]: string}
 type AppShellLabels = {-readonly [K in keyof (typeof appShellMessages)["en"]]: string}
 type RowMenuLabels = {-readonly [K in keyof (typeof rowMenuMessages)["en"]]: string}
+type CommandPaletteLabels = {-readonly [K in keyof (typeof commandPaletteMessages)["en"]]: string}
 type SelectLabels = {-readonly [K in keyof (typeof selectMessages)["en"]]: string}
 
 function getDatePickerLabels(locale: Locale | undefined, overrides?: Partial<DatePickerLabels>): DatePickerLabels {
@@ -115,6 +137,10 @@ function getSelectLabels(locale: Locale | undefined, overrides?: Partial<SelectL
   return {...selectMessages[resolveCatalog(locale)], ...overrides}
 }
 
+function getCommandPaletteLabels(locale: Locale | undefined, overrides?: Partial<CommandPaletteLabels>): CommandPaletteLabels {
+  return {...commandPaletteMessages[resolveCatalog(locale)], ...overrides}
+}
+
 function getErrorMessages(locale: Locale | undefined) {
   return errorMessages[resolveCatalog(locale)]
 }
@@ -122,6 +148,7 @@ function getErrorMessages(locale: Locale | undefined) {
 export {
   DEFAULT_LOCALE,
   getBottomNavLabels,
+  getCommandPaletteLabels,
   getDatePickerLabels,
   getErrorMessages,
   getModalLabels,
@@ -133,6 +160,7 @@ export {
   type AppShellLabels,
   type BottomNavLabels,
   type CatalogLocale,
+  type CommandPaletteLabels,
   type DatePickerLabels,
   type Locale,
   type ModalLabels,
