@@ -167,7 +167,7 @@ function UserMenu({
           // The row: avatar plus who, the whole width of a sidebar's foot. The
           // name is cut here (it is whole in the menu), the avatar never is.
           trigger === "row" &&
-            "md:size-auto md:w-full md:justify-start md:gap-2.5 md:rounded-lg md:p-1.5 md:text-left md:hover:bg-background md:hover:ring-0 md:data-[popup-open]:bg-background md:data-[popup-open]:ring-0 md:in-data-[density=compact]:size-auto",
+            "md:size-auto md:w-full md:justify-start md:gap-2.5 md:rounded-lg md:p-1.5 md:text-left md:hover:bg-background md:hover:ring-0 md:data-[popup-open]:bg-background md:data-[popup-open]:ring-0 md:in-data-[density=compact]:h-auto md:in-data-[density=compact]:w-full",
           className
         )}
       >
