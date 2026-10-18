@@ -42,6 +42,30 @@ interface DrawerProps {
   locale?: Locale
 }
 
+/**
+ * What the on-screen keyboard covers, and what is left. iOS (Safari and Chrome,
+ * both WebKit) keeps the layout viewport under the keyboard and shrinks only
+ * `visualViewport`, so a bottom sheet pinned to the layout viewport ends up behind it.
+ * `null` where there is no visualViewport (jsdom, old browsers) or nothing to track.
+ */
+function useKeyboardInset(active: boolean): {bottom: number; height: number} | null {
+  const [inset, setInset] = useState<{bottom: number; height: number} | null>(null)
+  useEffect(() => {
+    const vv = typeof window !== "undefined" ? window.visualViewport : null
+    if (!active || !vv) return
+    const sync = () => setInset({bottom: Math.max(0, window.innerHeight - vv.height - vv.offsetTop), height: vv.height})
+    sync()
+    vv.addEventListener("resize", sync)
+    vv.addEventListener("scroll", sync)
+    return () => {
+      vv.removeEventListener("resize", sync)
+      vv.removeEventListener("scroll", sync)
+      setInset(null)
+    }
+  }, [active])
+  return inset
+}
+
 /** Right on a wide screen, down on a phone; down until the first effect runs (SSR). */
 function useSide(): "right" | "down" {
   const [wide, setWide] = useState(false)
@@ -63,6 +87,7 @@ function Drawer({open, onClose, title, description, children, footer, size = "md
   const density = densityProp ?? scope.density
   const closeLabel = getModalLabels(locale).close
   const side = useSide()
+  const keyboard = useKeyboardInset(open && side === "down")
   return (
     <Primitive.Root open={open} onOpenChange={next => !next && onClose()} swipeDirection={side}>
       <Primitive.Portal data-ctech-theme={theme} data-density={density}>
@@ -75,6 +100,7 @@ function Drawer({open, onClose, title, description, children, footer, size = "md
         {/* The viewport is what turns on swipe-to-dismiss and touch scroll lock. */}
         <Primitive.Viewport className="fixed inset-0 z-50">
         <Primitive.Popup
+          style={keyboard ? {bottom: keyboard.bottom, maxHeight: keyboard.height * 0.9} : undefined}
           className={cn(
             "fixed z-50 flex flex-col bg-background text-foreground shadow-modal outline-none",
             "transition-transform duration-200 ease-out data-[swiping]:transition-none motion-reduce:transition-none",
@@ -102,7 +128,8 @@ function Drawer({open, onClose, title, description, children, footer, size = "md
               <CloseGlyph />
             </Primitive.Close>
           </header>
-          <div className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
+          {/* swipe-ignore: a vertical drag on a form is a scroll (above the keyboard), not a dismiss; the handle and header still swipe. */}
+          <div data-base-ui-swipe-ignore className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
           {footer && <footer className="border-t border-border bg-surface px-5 py-3">{footer}</footer>}
         </Primitive.Popup>
         </Primitive.Viewport>

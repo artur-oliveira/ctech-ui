@@ -35,6 +35,10 @@ describe("touch.css", () => {
     expect(block("> label::after")).toContain("z-index: -1")
   })
 
+  it("draws an Input at 16px under touch so iOS does not zoom on focus", () => {
+    expect(block('[data-slot="input"] {')).toContain("font-size: 1rem")
+  })
+
   it("does not override a control the caller positions", () => {
     expect(css).toContain(":not(.absolute, .fixed, .sticky)")
   })

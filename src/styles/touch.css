@@ -99,3 +99,14 @@
     min-height: var(--touch-target);
   }
 }
+
+/*
+ * iOS (Safari and Chrome alike) zooms the page when a focused field is drawn
+ * under 16px, and a zoomed page pushes fixed bars out of view. Not scoped to
+ * compact density: every Input needs it. Pinch-zoom itself stays available.
+ */
+@media (pointer: coarse), (max-width: 39.999rem) {
+  [data-slot="input"] {
+    font-size: 1rem;
+  }
+}
