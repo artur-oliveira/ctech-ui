@@ -11,14 +11,22 @@ wins and this file must be fixed. Install on a new machine:
 This is a shared frontend package consumed (or meant to be consumed) by every CTech product UI —
 breaking changes here should be versioned and communicated, not made casually.
 
-Confirmed consumers today (grepped sibling `ui/package.json` files, read-only): **ctech-billing**
-only (`^0.1.1`, 37 files under `ui/src` import from `@aoctech/ui`). `ctech-account`, `ctech-wallet`,
-`ctech-dfe` and `ctech-poker` do not depend on this package — each vendors its own local component
-set instead (e.g. `ctech-account/ui/src/components/ui/` has 15 hand-rolled ShadCN-style primitives).
-This isn't a docs/quality problem: those four products' `ui/` predates this repo's initial commit
-(2026-08-16) by two to five weeks, so they were never in a position to adopt it. `ctech-billing`'s
-`ui/` was built alongside/after this package and picked it up from day one. Any migration of the
-other four is a deliberate, separately-scoped effort, not a side effect of a docs fix.
+Package version `0.8.2`. Confirmed consumers (sibling `ui/package.json`, 2026-10-19): **ctech-billing**
+only (`^0.8.2`, 119 files under `ui/src` import from `@aoctech/ui`). `ctech-account`, `ctech-wallet`,
+`ctech-dfe` and `ctech-poker` do not depend on it yet and vendor their own local component sets (their `ui/`
+predates this repo). Migrating them is the plan (`ctech-skills/docs/plans/2026-10-19-ctech-standardization-plan.md`,
+Phase 4), a separately scoped effort, not a side effect of a docs fix.
+
+## Family policy (from `ctech-dev-standards`)
+
+- **`@aoctech/ui` must absorb what the products copied locally** (shadcn-like primitives, Checkbox, Tabs,
+  Textarea, Amount/MoneyInput, `QueryError`, `ConfirmDialog`, `StatusScreen`, liveness/retry hooks, step-up
+  dialog...). The billing list is in ctech-billing `docs/specs/2026-10-17-ui-upstream-proposals.md`. A generic
+  component written locally in a product is a bug: propose it here.
+- **CDK is frozen** (no new constructs; Terraform is the future). Frontends deploy through the reusable
+  Cloudflare Workers Static Assets workflow in ctech-cdk.
+- **Alerts** only via SNS `ctech-{env}-alerts` (go-common `api-commons/alerts`); no custom CloudWatch metrics or
+  alarms.
 
 ## CTech Family — Cross-Repo Awareness (IMPORTANT)
 
