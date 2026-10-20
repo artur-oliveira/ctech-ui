@@ -14,6 +14,7 @@ Um componente entra em `@aoctech/ui` quando pelo menos dois produtos precisam do
 | Listas | `SwipeRow`/`useSwipeReveal` (sempre com `RowMenu`: o gesto nunca é o único caminho) |
 | Feedback | `Alert`, `Badge`, `Skeleton`, `EmptyState` |
 | Estrutura | `PageHeader`, `Separator` |
+| Rede | `NetworkProvider`, `OfflineBanner`, `UnavailableScreen`, `useNetwork`, `useOnlineStatus`, `createLiveness`, `withRetry` (0.9.0; ver `docs/network-resilience.md`) |
 | Overlay | `Modal` e `Drawer` baseados em Base UI |
 | Navegação | `AppShell` + `SidebarNav` (barra no topo, rail de seções fixo à esquerda a partir de `md`), `BottomNav` (mobile, com folha "Mais") e `UserMenu` (avatar ou linha, troca de visão, grupos de escolha como o modo, sair), `CommandPalette` (busca ⌘K de telas e ações, `matchEntries` sem acento) |
 

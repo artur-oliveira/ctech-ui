@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import {test} from "node:test"
 
-import {getBottomNavLabels, getCommandPaletteLabels, getDatePickerLabels, getErrorMessages, getModalLabels, getRowMenuLabels, getSelectLabels, getUserMenuLabels, resolveCatalog} from "./i18n.ts"
+import {getBottomNavLabels, getCommandPaletteLabels, getDatePickerLabels, getErrorMessages, getModalLabels, getNetworkLabels, getRowMenuLabels, getSelectLabels, getUserMenuLabels, resolveCatalog} from "./i18n.ts"
 
 test("resolves BCP-47 tags to a catalog, defaulting to pt-BR", () => {
   assert.equal(resolveCatalog(undefined), "pt-BR")
@@ -54,4 +54,10 @@ test("command palette copy per locale, with overrides", () => {
   assert.equal(getCommandPaletteLabels("en").empty, "Nothing found for")
   assert.equal(getCommandPaletteLabels("en", {trigger: "Find"}).trigger, "Find")
   assert.equal(getCommandPaletteLabels("en", {trigger: "Find"}).action, "Action")
+})
+
+test("network copy per locale, with overrides", () => {
+  assert.equal(getNetworkLabels(undefined).retry, "Tentar de novo")
+  assert.equal(getNetworkLabels("en-US").offline, "You are offline")
+  assert.equal(getNetworkLabels("en", {retry: "Retry"}).retry, "Retry")
 })
