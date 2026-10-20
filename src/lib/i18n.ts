@@ -85,6 +85,29 @@ const commandPaletteMessages = {
   },
 } as const
 
+const networkMessages = {
+  "pt-BR": {
+    offline: "Você está sem internet",
+    offlineHint: "Retomamos sozinhos quando a conexão voltar.",
+    degraded: "Conexão instável",
+    degradedHint: "Estamos verificando o serviço. Seus dados continuam seguros.",
+    unavailable: "Serviço temporariamente indisponível",
+    unavailableHint: "Continuamos verificando e voltamos assim que ele responder.",
+    retry: "Tentar de novo",
+    checking: "Verificando…",
+  },
+  en: {
+    offline: "You are offline",
+    offlineHint: "We will resume on our own when the connection is back.",
+    degraded: "Unstable connection",
+    degradedHint: "We are checking the service. Your data is safe.",
+    unavailable: "Service temporarily unavailable",
+    unavailableHint: "We keep checking and will bring you back as soon as it answers.",
+    retry: "Try again",
+    checking: "Checking…",
+  },
+} as const
+
 const errorMessages = {
   "pt-BR": {
     400: {title: "Não foi possível abrir este endereço", description: "Confira os parâmetros do link ou volte ao início para continuar."},
@@ -100,6 +123,7 @@ const errorMessages = {
   },
 } as const
 
+type NetworkLabels = {-readonly [K in keyof (typeof networkMessages)["en"]]: string}
 type DatePickerLabels = {-readonly [K in keyof (typeof datePickerMessages)["en"]]: string}
 type ModalLabels = {-readonly [K in keyof (typeof modalMessages)["en"]]: string}
 type BottomNavLabels = {-readonly [K in keyof (typeof bottomNavMessages)["en"]]: string}
@@ -141,6 +165,10 @@ function getCommandPaletteLabels(locale: Locale | undefined, overrides?: Partial
   return {...commandPaletteMessages[resolveCatalog(locale)], ...overrides}
 }
 
+function getNetworkLabels(locale: Locale | undefined, overrides?: Partial<NetworkLabels>): NetworkLabels {
+  return {...networkMessages[resolveCatalog(locale)], ...overrides}
+}
+
 function getErrorMessages(locale: Locale | undefined) {
   return errorMessages[resolveCatalog(locale)]
 }
@@ -152,6 +180,7 @@ export {
   getDatePickerLabels,
   getErrorMessages,
   getModalLabels,
+  getNetworkLabels,
   getRowMenuLabels,
   getSelectLabels,
   getUserMenuLabels,
@@ -164,6 +193,7 @@ export {
   type DatePickerLabels,
   type Locale,
   type ModalLabels,
+  type NetworkLabels,
   type RowMenuLabels,
   type SelectLabels,
   type UserMenuLabels,

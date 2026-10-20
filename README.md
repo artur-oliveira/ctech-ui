@@ -163,6 +163,8 @@ so a badge renders what the server said rather than a client-side mapping of an 
 | `FileDrop` | One file, dropped or chosen: checks `accept` (dot-extensions against the name, MIME types and `type/*` against the file type; prefer extensions for PEM) and `maxBytes` before `onFile`, never reads the content. The file input is the keyboard control and its description names the chosen file; Remove returns focus to it. 44 px controls, every string a prop. Since 0.5.0. |
 | `DensityScope` | A compact (or comfortable) surface whose overlays follow it. Since 0.4.0. |
 
+| `NetworkProvider` + `OfflineBanner` + `UnavailableScreen` + `useNetwork` | Network resilience: one health probe, an accessible offline/degraded strip and a full 503 page that returns on its own. Plus the framework-free `createLiveness`, `withRetry` and `useOnlineStatus`. See [docs/network-resilience.md](docs/network-resilience.md). Since 0.9.0. |
+
 ### Navigation: `BottomNav` and `UserMenu`
 
 Neither knows anything about routing. The caller says which item is `active` (or `current`) from
