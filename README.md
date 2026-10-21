@@ -143,7 +143,7 @@ so a badge renders what the server said rather than a client-side mapping of an 
 | `Input` + `Field` | Visible labels, hint/error copy and invalid state vocabulary. |
 | `Alert` | Info, success, warning and danger feedback. |
 | `Badge` | The four status tones. Pair with a glyph — never colour alone. |
-| `Modal` | Base UI `Dialog`: real focus trap, scroll lock, restore focus, Escape. |
+| `Modal` | Base UI `Dialog`: real focus trap, scroll lock, restore focus, Escape. Since 0.10.0 (also on `Drawer`): `initialFocus`, `dismissible`, `hideClose`, `aria`; Modal also `footer`, `hideCancel`. For money/deletion confirmations see `docs/confirmation-dialogs.md`. |
 | `PageHeader` | One h1, one optional line, one optional action. |
 | `EmptyState` | Title, description, optional action. |
 | `Skeleton` | Honours `prefers-reduced-motion`. |
