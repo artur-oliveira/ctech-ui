@@ -4,6 +4,7 @@ import {Dialog} from "@base-ui/react/dialog"
 import type {ReactNode} from "react"
 
 import {cn} from "../lib/cn"
+import {guardedOpenChange, resolveInitialFocus, type DialogGuardProps} from "../lib/dialog-options"
 import {DEFAULT_LOCALE, getModalLabels, type Locale, type ModalLabels} from "../lib/i18n"
 import {Button} from "./button"
 import {useThemeScope, type Density} from "./theme-provider"
@@ -23,7 +24,7 @@ const SIZE = {
   xl: "max-w-4xl",
 } as const
 
-interface ModalProps {
+interface ModalProps extends DialogGuardProps {
   open: boolean
   onClose: () => void
   title: string
@@ -37,6 +38,10 @@ interface ModalProps {
   danger?: boolean
   submitDisabled?: boolean
   size?: keyof typeof SIZE
+  /** Replaces the default Cancel/submit footer entirely (`null` renders none). */
+  footer?: ReactNode
+  /** Keeps the default footer but without Cancel, so a single action remains. */
+  hideCancel?: boolean
   /** BCP-47 tag for built-in copy. Defaults to "pt-BR". */
   locale?: Locale
   /** Overrides built-in strings; submitLabel/cancelLabel take precedence. */
@@ -64,6 +69,12 @@ function Modal({
   locale = DEFAULT_LOCALE,
   labels,
   density: densityProp,
+  footer,
+  hideCancel = false,
+  initialFocus,
+  dismissible = true,
+  hideClose = false,
+  aria,
 }: ModalProps) {
   const text = getModalLabels(locale, labels)
   const scope = useThemeScope()
@@ -71,7 +82,7 @@ function Modal({
   const density = densityProp ?? scope.density
 
   return (
-    <Dialog.Root open={open} onOpenChange={next => !next && onClose()}>
+    <Dialog.Root open={open} onOpenChange={guardedOpenChange(dismissible, onClose)} disablePointerDismissal={!dismissible}>
       <Dialog.Portal data-ctech-theme={theme} data-density={density}>
         <Dialog.Backdrop
           className={cn(
@@ -82,6 +93,9 @@ function Modal({
           )}
         />
         <Dialog.Popup
+          initialFocus={resolveInitialFocus(initialFocus)}
+          {...(aria?.role && {role: aria.role})}
+          aria-describedby={aria?.describedBy}
           className={cn(
             "fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
             "w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto",
@@ -104,37 +118,48 @@ function Modal({
                 </Dialog.Description>
               )}
             </div>
-            <Dialog.Close
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={text.close}
-                  className="-mr-2 shrink-0 text-muted-foreground"
-                />
-              }
-            >
-              <CloseGlyph />
-            </Dialog.Close>
+            {!hideClose && (
+              <Dialog.Close
+                disabled={!dismissible}
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={text.close}
+                    className="-mr-2 shrink-0 text-muted-foreground"
+                  />
+                }
+              >
+                <CloseGlyph />
+              </Dialog.Close>
+            )}
           </header>
 
           {children && <div className="px-6 py-5">{children}</div>}
 
+          {footer === undefined ? (
           <footer className="sticky bottom-0 flex justify-end gap-3 border-t border-border bg-surface px-6 py-4">
-            <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-              {cancelLabel ?? text.cancel}
-            </Button>
-            {onSubmit && (
-              <Button
-                type="button"
-                variant={danger ? "danger" : "brand"}
-                onClick={onSubmit}
-                disabled={loading || submitDisabled}
-              >
-                {loading ? text.loading : submitLabel ?? text.submit}
-              </Button>
-            )}
-          </footer>
+              {!hideCancel && (
+                <Button type="button" variant="outline" onClick={onClose} disabled={loading || !dismissible}>
+                  {cancelLabel ?? text.cancel}
+                </Button>
+              )}
+              {onSubmit && (
+                <Button
+                  type="button"
+                  variant={danger ? "danger" : "brand"}
+                  onClick={onSubmit}
+                  disabled={loading || submitDisabled}
+                >
+                  {loading ? text.loading : submitLabel ?? text.submit}
+                </Button>
+              )}
+            </footer>
+          ) : (
+            footer !== null && (
+              <footer className="sticky bottom-0 border-t border-border bg-surface px-6 py-4">{footer}</footer>
+            )
+          )}
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>

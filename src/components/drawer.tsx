@@ -5,6 +5,7 @@ import {useEffect, useState} from "react"
 import type {ReactNode} from "react"
 
 import {cn} from "../lib/cn"
+import {guardedOpenChange, resolveInitialFocus, type DialogGuardProps} from "../lib/dialog-options"
 import {DEFAULT_LOCALE, getModalLabels, type Locale} from "../lib/i18n"
 import {Button} from "./button"
 import {useThemeScope, type Density} from "./theme-provider"
@@ -25,7 +26,7 @@ const WIDTH = {
   lg: "sm:max-w-xl",
 } as const
 
-interface DrawerProps {
+interface DrawerProps extends DialogGuardProps {
   open: boolean
   onClose: () => void
   title: string
@@ -81,7 +82,7 @@ function useSide(): "right" | "down" {
   return wide ? "right" : "down"
 }
 
-function Drawer({open, onClose, title, description, children, footer, size = "md", density: densityProp, locale = DEFAULT_LOCALE}: DrawerProps) {
+function Drawer({open, onClose, title, description, children, footer, size = "md", density: densityProp, locale = DEFAULT_LOCALE, initialFocus, dismissible = true, hideClose = false, aria}: DrawerProps) {
   const scope = useThemeScope()
   const theme = scope.theme
   const density = densityProp ?? scope.density
@@ -89,7 +90,7 @@ function Drawer({open, onClose, title, description, children, footer, size = "md
   const side = useSide()
   const keyboard = useKeyboardInset(open && side === "down")
   return (
-    <Primitive.Root open={open} onOpenChange={next => !next && onClose()} swipeDirection={side}>
+    <Primitive.Root open={open} onOpenChange={guardedOpenChange(dismissible, onClose)} disablePointerDismissal={!dismissible} swipeDirection={side}>
       <Primitive.Portal data-ctech-theme={theme} data-density={density}>
         <Primitive.Backdrop
           className={cn(
@@ -100,6 +101,9 @@ function Drawer({open, onClose, title, description, children, footer, size = "md
         {/* The viewport is what turns on swipe-to-dismiss and touch scroll lock. */}
         <Primitive.Viewport className="fixed inset-0 z-50">
         <Primitive.Popup
+          initialFocus={resolveInitialFocus(initialFocus)}
+          {...(aria?.role && {role: aria.role})}
+          aria-describedby={aria?.describedBy}
           style={keyboard ? {bottom: keyboard.bottom, maxHeight: keyboard.height * 0.9} : undefined}
           className={cn(
             "fixed z-50 flex flex-col bg-background text-foreground shadow-modal outline-none",
@@ -124,9 +128,11 @@ function Drawer({open, onClose, title, description, children, footer, size = "md
               <Primitive.Title className="text-base font-semibold text-foreground">{title}</Primitive.Title>
               {description && <Primitive.Description className="text-sm text-muted-foreground">{description}</Primitive.Description>}
             </div>
-            <Primitive.Close render={<Button variant="ghost" size="icon" aria-label={closeLabel} className="-mr-2 shrink-0 text-muted-foreground" />}>
-              <CloseGlyph />
-            </Primitive.Close>
+            {!hideClose && (
+              <Primitive.Close disabled={!dismissible} render={<Button variant="ghost" size="icon" aria-label={closeLabel} className="-mr-2 shrink-0 text-muted-foreground" />}>
+                <CloseGlyph />
+              </Primitive.Close>
+            )}
           </header>
           {/* swipe-ignore: a vertical drag on a form is a scroll (above the keyboard), not a dismiss; the handle and header still swipe. */}
           <div data-base-ui-swipe-ignore className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
