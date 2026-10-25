@@ -25,6 +25,8 @@ const buttonVariants = cva(
         outline: "border-border bg-background text-foreground hover:bg-surface",
         ghost: "text-foreground hover:bg-surface",
         danger: "bg-danger text-white hover:bg-danger-strong",
+        // A light fill for use ON a brand-coloured surface (a hero, a banner).
+        light: "bg-background text-brand-700 hover:bg-brand-50",
         link: "text-brand-600 underline-offset-4 hover:underline",
       },
       size: {
@@ -33,6 +35,7 @@ const buttonVariants = cva(
         // button is touch-sized and the same component in the console is not.
         default: "h-11 px-3.5 in-data-[density=compact]:h-8 in-data-[density=compact]:px-2.5",
         sm: "h-9 px-3 text-xs in-data-[density=compact]:h-7 in-data-[density=compact]:px-2.5",
+        lg: "h-12 px-5 text-base in-data-[density=compact]:h-9 in-data-[density=compact]:px-3.5",
         icon: "size-11 in-data-[density=compact]:size-8",
       },
       block: {
@@ -54,8 +57,14 @@ function Button({
   size,
   block,
   nativeButton,
+  loading,
+  disabled,
+  children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants> & {
+  /** Work in progress: shows a spinner before the label, sets `aria-busy` and disables the button (no double submit). */
+  loading?: boolean
+}) {
   return (
     <ButtonPrimitive
       data-slot="button"
@@ -65,8 +74,21 @@ function Button({
       // default nativeButton to false there instead of warning on every usage.
       nativeButton={nativeButton ?? !props.render}
       className={cn(buttonVariants({variant, size, block, className}))}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
       {...props}
-    />
+    >
+      {loading && <Spinner />}
+      {children}
+    </ButtonPrimitive>
+  )
+}
+
+function Spinner() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden className="animate-spin motion-reduce:animate-none">
+      <path d="M8 2a6 6 0 1 0 6 6" strokeLinecap="round" />
+    </svg>
   )
 }
 

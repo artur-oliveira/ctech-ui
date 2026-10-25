@@ -18,7 +18,15 @@ interface NetworkContextValue {
 
 const NetworkContext = createContext<NetworkContextValue | null>(null)
 
-interface NetworkProviderProps extends Omit<LivenessOptions, "onReconnect"> {
+interface NetworkProviderProps extends Partial<Omit<LivenessOptions, "onReconnect">> {
+  /**
+   * An existing probe to follow instead of creating one, so the API client and
+   * the sockets share it. `url` is then not needed. `onReconnect` still fires
+   * here on each return to online.
+   */
+  liveness?: Liveness
+  /** Start (and stop) polling the probe. Default true; false when the app already starts it. */
+  start?: boolean
   children: ReactNode
   /** Back to online after any outage: refetch/invalidate your queries here. */
   onReconnect?: () => void
@@ -31,13 +39,23 @@ interface NetworkProviderProps extends Omit<LivenessOptions, "onReconnect"> {
 }
 
 /** Owns one liveness probe for the app. Framework-free: routing and cache refresh are callbacks. */
-function NetworkProvider({children, onReconnect, onUnavailable, banner = true, locale, labels, ...options}: NetworkProviderProps) {
+function NetworkProvider({children, onReconnect, onUnavailable, banner = true, locale, labels, liveness: external, start = true, ...options}: NetworkProviderProps) {
   const handlers = useRef({onReconnect, onUnavailable})
   handlers.current = {onReconnect, onUnavailable}
   // Options are read once: the probe is created per mount, change `key` to rebuild it.
-  const liveness: Liveness = useMemo(() => createLiveness({...options, onReconnect: () => handlers.current.onReconnect?.()}), []) // eslint-disable-line react-hooks/exhaustive-deps
+  const liveness: Liveness = useMemo(() => {
+    if (external) return external
+    if (!options.url) throw new Error("NetworkProvider needs `url` or an existing `liveness`")
+    return createLiveness({...(options as LivenessOptions), onReconnect: () => handlers.current.onReconnect?.()})
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const snapshot = useSyncExternalStore(liveness.subscribe, liveness.getSnapshot, liveness.getSnapshot)
-  useEffect(() => liveness.start(), [liveness])
+  useEffect(() => (start ? liveness.start() : undefined), [liveness, start])
+  // An injected probe has its own onReconnect (or none); ours is driven by its transitions.
+  const previous = useRef<NetworkStatus>("online")
+  useEffect(() => {
+    if (external && snapshot.status === "online" && previous.current !== "online") handlers.current.onReconnect?.()
+    previous.current = snapshot.status
+  }, [external, snapshot.status])
   useEffect(() => { if (snapshot.status === "unavailable") handlers.current.onUnavailable?.() }, [snapshot.status])
   const value = useMemo(() => ({status: snapshot.status, checked: snapshot.checkedAt !== null, retry: () => void liveness.check()}), [snapshot.status, snapshot.checkedAt, liveness])
   return (
