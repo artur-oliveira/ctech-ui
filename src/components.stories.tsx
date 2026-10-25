@@ -12,7 +12,7 @@ import {Modal as ModalComponent} from "./components/modal"
 import {Drawer as DrawerComponent} from "./components/drawer"
 import {PageHeader as PageHeaderComponent} from "./components/page-header"
 import {Separator as SeparatorComponent} from "./components/separator"
-import {Skeleton as SkeletonComponent} from "./components/skeleton"
+import {Skeleton as SkeletonComponent, SkeletonList, StatCardsSkeleton} from "./components/skeleton"
 import {Radio as RadioComponent, RadioGroup as RadioGroupComponent} from "./components/radio"
 import {Switch as SwitchComponent} from "./components/switch"
 import {ThemeProvider as ThemeProviderComponent} from "./components/theme-provider"
@@ -32,7 +32,7 @@ function EmptyStateExample() {
 }
 
 function SkeletonExample() {
-  return <main className="mx-auto max-w-5xl space-y-4" aria-label="Exemplo de carregamento"><SkeletonComponent className="h-5 w-40" /><SkeletonComponent className="h-11 w-full max-w-xl" /><SkeletonComponent className="h-24 w-full" /></main>
+  return <main className="mx-auto max-w-5xl space-y-4" aria-label="Exemplo de carregamento"><SkeletonComponent className="h-5 w-40" /><SkeletonComponent className="h-11 w-full max-w-xl" /><SkeletonComponent className="h-24 w-full" shimmer /><SkeletonList label="Carregando" count={2} /><StatCardsSkeleton label="Carregando números" /></main>
 }
 
 function SeparatorExample() {
@@ -64,7 +64,7 @@ export const Overview: Story = {name: "Visão geral"}
 
 export const Button: StoryObj = {render: () => <main className="mx-auto flex max-w-5xl flex-wrap gap-3"><ButtonComponent>Continuar</ButtonComponent><ButtonComponent variant="outline">Secundária</ButtonComponent><ButtonComponent variant="ghost">Neutra</ButtonComponent><ButtonComponent variant="danger">Excluir</ButtonComponent></main>}
 export const Badge: StoryObj = {render: () => <main className="mx-auto flex max-w-5xl flex-wrap gap-2"><BadgeComponent tone="neutral">Pendente</BadgeComponent><BadgeComponent tone="positive">Concluído</BadgeComponent><BadgeComponent tone="attention">Atenção</BadgeComponent><BadgeComponent tone="urgent">Urgente</BadgeComponent></main>}
-export const Alert: StoryObj = {render: () => <main className="mx-auto grid max-w-5xl gap-3"><AlertComponent tone="info" title="Informação">Uma atualização está disponível.</AlertComponent><AlertComponent tone="success" title="Alterações salvas">Sua configuração foi atualizada.</AlertComponent><AlertComponent tone="warning" title="Atenção">Revise os dados antes de continuar.</AlertComponent><AlertComponent tone="danger" title="Não foi possível concluir">Tente novamente em instantes.</AlertComponent></main>}
+export const Alert: StoryObj = {render: () => <main className="mx-auto grid max-w-5xl gap-3"><AlertComponent tone="info" title="Informação">Uma atualização está disponível.</AlertComponent><AlertComponent tone="success" title="Alterações salvas">Sua configuração foi atualizada.</AlertComponent><AlertComponent tone="warning" title="Atenção">Revise os dados antes de continuar.</AlertComponent><AlertComponent tone="danger" title="Não foi possível concluir">Tente novamente em instantes.</AlertComponent><AlertComponent tone="danger">Alert só com corpo, sem título.</AlertComponent></main>}
 export const FieldAndInput: StoryObj = {render: () => <main className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2"><FieldComponent label="E-mail" htmlFor="story-email" hint="Usaremos apenas para contato."><InputComponent id="story-email" type="email" placeholder="nome@empresa.com" /></FieldComponent><FieldComponent label="Código fiscal" htmlFor="story-code" error="Informe um código válido."><InputComponent id="story-code" aria-invalid="true" aria-describedby="story-code-error" defaultValue="ABC" /></FieldComponent></main>, name: "Field & Input"}
 
 export const PageHeader: StoryObj = {render: () => <PageHeaderExample />, name: "Page Header"}

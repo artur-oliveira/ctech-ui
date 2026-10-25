@@ -60,6 +60,10 @@ interface UserMenuProps {
   items?: UserMenuItem[]
   /** Renders the sign-out item when given. */
   onSignOut?: () => void
+  /** Sign-out is running: the item is disabled, shows a spinner and `labels.signingOut`, and reports `aria-busy`. */
+  signOutPending?: boolean
+  /** Disables the sign-out item without the pending look. */
+  signOutDisabled?: boolean
   renderLink?: RenderLink
   /** Which edge of the avatar the menu lines up with. Defaults to "end". */
   align?: "start" | "center" | "end"
@@ -113,6 +117,8 @@ function UserMenu({
   trigger = "avatar",
   items = [],
   onSignOut,
+  signOutPending = false,
+  signOutDisabled = false,
   renderLink = defaultRenderLink,
   align = "end",
   locale = DEFAULT_LOCALE,
@@ -238,9 +244,15 @@ function UserMenu({
             {onSignOut && (
               <>
                 <Menu.Separator className="-mx-1.5 my-1 h-px bg-border" />
-                <Menu.Item onClick={onSignOut} data-slot="menu-item" className={ITEM}>
-                  <span aria-hidden className={ICON}><SignOutGlyph /></span>
-                  <span className="min-w-0 flex-1">{text.signOut}</span>
+                <Menu.Item
+                  onClick={onSignOut}
+                  disabled={signOutPending || signOutDisabled}
+                  aria-busy={signOutPending || undefined}
+                  data-slot="menu-item"
+                  className={cn(ITEM, "data-[disabled]:cursor-not-allowed data-[disabled]:opacity-60")}
+                >
+                  <span aria-hidden className={ICON}>{signOutPending ? <SpinnerGlyph /> : <SignOutGlyph />}</span>
+                  <span className="min-w-0 flex-1">{signOutPending ? text.signingOut : text.signOut}</span>
                 </Menu.Item>
               </>
             )}
@@ -263,6 +275,14 @@ function SignOutGlyph() {
   return (
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden>
       <path d="M6 2.75H3.75a1 1 0 0 0-1 1v8.5a1 1 0 0 0 1 1H6M10.5 11l3-3-3-3M13.25 8H6.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function SpinnerGlyph() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden className="animate-spin motion-reduce:animate-none">
+      <path d="M8 2a6 6 0 1 0 6 6" strokeLinecap="round" />
     </svg>
   )
 }
