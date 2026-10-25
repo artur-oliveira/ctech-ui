@@ -1,10 +1,12 @@
 "use client"
 
 import {Select as Primitive} from "@base-ui/react/select"
-import type {ReactNode} from "react"
+import {Fragment, type ReactNode} from "react"
 
 import {cn} from "../lib/cn"
+import {defaultRenderLink, type RenderLink} from "../lib/link"
 import {DEFAULT_LOCALE, getSelectLabels, type Locale, type SelectLabels} from "../lib/i18n"
+import {useControlA11y} from "./field"
 import {useThemeScope, type Density} from "./theme-provider"
 
 interface SelectOption {
@@ -16,6 +18,18 @@ interface SelectOption {
    */
   icon?: ReactNode
   disabled?: boolean
+  /** Section heading: consecutive options with the same `group` are listed under one (first appearance orders the groups). */
+  group?: string
+  /** Decoration at the end of the row, such as a lock for a feature the plan does not include. Hidden from assistive technology: say why in `hint`. */
+  trailing?: ReactNode
+  /** Extra line of text under the label, read with it (why an option is locked, say). */
+  hint?: string
+  /**
+   * Renders the item as a link (through `renderLink`) instead of a choice:
+   * pressing it navigates and the value does not change. For "see all",
+   * "upgrade" and the like.
+   */
+  href?: string
 }
 
 /**
@@ -48,6 +62,8 @@ interface SelectProps {
   disabled?: boolean
   /** Submits the value with a form, as a hidden input. */
   name?: string
+  /** Router-aware link for options with `href`. Defaults to a plain `<a>`. */
+  renderLink?: RenderLink
   /** BCP-47 tag for built-in copy. Defaults to "pt-BR". */
   locale?: Locale
   labels?: Partial<SelectLabels>
@@ -57,6 +73,7 @@ interface SelectProps {
   "aria-labelledby"?: string
   "aria-invalid"?: boolean
   "aria-describedby"?: string
+  "aria-errormessage"?: string
   className?: string
 }
 
@@ -93,9 +110,12 @@ function Select({
   locale = DEFAULT_LOCALE,
   labels,
   density: densityProp,
+  renderLink = defaultRenderLink,
   className,
   ...aria
 }: SelectProps) {
+  // Same wiring as Input: id and descriptions from the surrounding Field.
+  const wired = useControlA11y({id, ...aria})
   const text = getSelectLabels(locale, labels)
   const scope = useThemeScope()
   const density = densityProp ?? scope.density
@@ -111,6 +131,8 @@ function Select({
       value={value === "" ? (noneLabel ? NONE : null) : value}
       onValueChange={(next, details) => {
         const raw = (next as string | null) ?? ""
+        // A link item navigates by itself; it is never the value.
+        if (find(raw)?.href !== undefined) return
         if (raw.startsWith(ACTION)) {
           // Only a press in the open list (a click, a tap, Enter) runs an
           // action. Base UI also types ahead on a closed, focused trigger, and
@@ -123,11 +145,12 @@ function Select({
       disabled={disabled}
     >
       <Primitive.Trigger
-        id={id}
+        id={wired.id}
         aria-label={aria["aria-label"]}
         aria-labelledby={aria["aria-labelledby"]}
-        aria-invalid={aria["aria-invalid"]}
-        aria-describedby={aria["aria-describedby"]}
+        aria-invalid={wired["aria-invalid"]}
+        aria-describedby={wired["aria-describedby"]}
+        aria-errormessage={wired["aria-errormessage"]}
         data-slot="select-trigger"
         className={cn(
           "flex h-11 w-full min-w-0 items-center justify-between gap-2 rounded-lg border border-border bg-background px-3 text-left text-sm text-foreground outline-none",
@@ -170,17 +193,41 @@ function Select({
             )}
           >
             <Primitive.List>
-              {options.map(option => (
-                <Primitive.Item key={option.value} value={option.value} disabled={option.disabled} data-slot="select-item" className={cn(ITEM, "justify-between")}>
-                  <span className="flex min-w-0 items-center gap-2">
-                    {option.icon && <OptionIcon>{option.icon}</OptionIcon>}
-                    <Primitive.ItemText className={cn("min-w-0", option.value === NONE && "text-muted-foreground")}>{option.label}</Primitive.ItemText>
-                  </span>
-                  <Primitive.ItemIndicator className="flex shrink-0 text-brand-600">
-                    <CheckGlyph />
-                  </Primitive.ItemIndicator>
-                </Primitive.Item>
-              ))}
+              {groupOptions(options).map(({group, items}, g) => {
+                const rows = items.map(option => {
+                  const href = option.href
+                  return (
+                    <Primitive.Item
+                      key={option.value}
+                      value={option.value}
+                      disabled={option.disabled}
+                      data-slot="select-item"
+                      className={cn(ITEM, "justify-between")}
+                      {...(href !== undefined ? {render: (props: object) => renderLink({...props, href})} : {})}
+                    >
+                      <span className="flex min-w-0 items-center gap-2">
+                        {option.icon && <OptionIcon>{option.icon}</OptionIcon>}
+                        <span className="min-w-0">
+                          <Primitive.ItemText className={cn("min-w-0", option.value === NONE && "text-muted-foreground")}>{option.label}</Primitive.ItemText>
+                          {option.hint && <span className="block text-xs text-muted-foreground">{option.hint}</span>}
+                        </span>
+                      </span>
+                      {option.trailing && <OptionIcon className="text-muted-foreground">{option.trailing}</OptionIcon>}
+                      <Primitive.ItemIndicator className="flex shrink-0 text-brand-600">
+                        <CheckGlyph />
+                      </Primitive.ItemIndicator>
+                    </Primitive.Item>
+                  )
+                })
+                return group === undefined ? (
+                  <Fragment key={g}>{rows}</Fragment>
+                ) : (
+                  <Primitive.Group key={g}>
+                    <Primitive.GroupLabel className="px-2.5 pt-2 pb-1 text-xs font-medium text-muted-foreground">{group}</Primitive.GroupLabel>
+                    {rows}
+                  </Primitive.Group>
+                )
+              })}
               {actions.length > 0 && <Primitive.Separator className="-mx-1 my-1 h-px bg-border" />}
               {actions.map((action, i) => (
                 <Primitive.Item key={`${ACTION}${i}`} value={`${ACTION}${i}`} data-slot="select-item" data-action="" className={ITEM}>
@@ -194,6 +241,17 @@ function Select({
       </Primitive.Portal>
     </Primitive.Root>
   )
+}
+
+/** Buckets options by `group`, keeping the order of first appearance; ungrouped ones stay where they are. */
+function groupOptions(options: SelectOption[]): {group: string | undefined; items: SelectOption[]}[] {
+  const out: {group: string | undefined; items: SelectOption[]}[] = []
+  for (const option of options) {
+    const bucket = out.find(b => b.group === option.group && (option.group !== undefined || b === out[out.length - 1]))
+    if (bucket) bucket.items.push(option)
+    else out.push({group: option.group, items: [option]})
+  }
+  return out
 }
 
 function OptionIcon({children, className}: {children: ReactNode; className?: string}) {
