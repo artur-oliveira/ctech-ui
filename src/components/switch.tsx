@@ -9,7 +9,9 @@ function Switch({className, ...props}: SwitchPrimitive.Root.Props) {
     <SwitchPrimitive.Root
       data-slot="switch"
       className={cn(
-        "flex h-6 w-11 shrink-0 items-center rounded-full border border-border bg-surface p-0.5 outline-none",
+        // `after:` is a 44px-tall hit area for a switch that has no wrapping <label>
+        // (labelled by aria-labelledby/aria-label). Inside a label the label is the target.
+        "relative flex h-6 w-11 shrink-0 after:absolute after:inset-x-0 after:-inset-y-2.5 after:content-[''] in-[label]:after:hidden items-center rounded-full border border-border bg-surface p-0.5 outline-none",
         "transition-[background-color,border-color,box-shadow] duration-150",
         "data-[checked]:border-brand-600 data-[checked]:bg-brand-600",
         "focus-visible:ring-3 focus-visible:ring-ring/35 disabled:cursor-not-allowed disabled:opacity-50",
