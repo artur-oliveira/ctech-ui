@@ -37,6 +37,7 @@ test("bottom nav and user menu copy per locale, with overrides", () => {
   assert.equal(getBottomNavLabels("pt-BR").nav, "Navegação principal")
   assert.equal(getBottomNavLabels("en-GB").close, "Close")
   assert.equal(getUserMenuLabels(undefined).signOut, "Sair")
+  assert.equal(getUserMenuLabels("en").signingOut, "Signing out…")
   assert.equal(getUserMenuLabels("en", {signOut: "Log out"}).signOut, "Log out")
 })
 

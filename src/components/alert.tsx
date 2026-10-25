@@ -1,4 +1,4 @@
-import type {ReactNode} from "react"
+import type {ComponentProps, ReactNode} from "react"
 import {cva, type VariantProps} from "class-variance-authority"
 
 import {cn} from "../lib/cn"
@@ -16,17 +16,34 @@ const alertVariants = cva("flex gap-3 rounded-lg border px-4 py-3 text-sm", {
 })
 
 interface AlertProps extends VariantProps<typeof alertVariants> {
-  title: string
+  /** Optional: an alert may be just a body (an inline error line). */
+  title?: string
+  /** The body, or any composition of `AlertTitle` and `AlertDescription`. */
   children?: ReactNode
+  /** A glyph before the text. Decorative: the tone and the text carry the meaning. */
+  icon?: ReactNode
   className?: string
 }
 
-function Alert({title, children, tone, className}: AlertProps) {
+function Alert({title, children, tone, icon, className}: AlertProps) {
+  const hasBody = children !== undefined && children !== null && children !== false
   return (
     <div data-slot="alert" role={tone === "danger" ? "alert" : "status"} className={cn(alertVariants({tone}), className)}>
-      <div className="grid gap-1"><p className="font-medium">{title}</p>{children && <div>{children}</div>}</div>
+      {icon && <span aria-hidden className="mt-0.5 flex shrink-0 [&_svg:not([class*='size-'])]:size-4">{icon}</span>}
+      <div className="grid min-w-0 gap-1">
+        {title && <p className="font-medium">{title}</p>}
+        {hasBody && <div>{children}</div>}
+      </div>
     </div>
   )
 }
 
-export {Alert, alertVariants, type AlertProps}
+function AlertTitle({className, ...props}: ComponentProps<"p">) {
+  return <p data-slot="alert-title" className={cn("font-medium", className)} {...props} />
+}
+
+function AlertDescription({className, ...props}: ComponentProps<"div">) {
+  return <div data-slot="alert-description" className={className} {...props} />
+}
+
+export {Alert, AlertDescription, AlertTitle, alertVariants, type AlertProps}

@@ -45,8 +45,8 @@ const bottomNavMessages = {
 } as const
 
 const userMenuMessages = {
-  "pt-BR": {trigger: "Menu da conta", views: "Alternar visão", signOut: "Sair"},
-  en: {trigger: "Account menu", views: "Switch view", signOut: "Sign out"},
+  "pt-BR": {trigger: "Menu da conta", views: "Alternar visão", signOut: "Sair", signingOut: "Saindo…"},
+  en: {trigger: "Account menu", views: "Switch view", signOut: "Sign out", signingOut: "Signing out…"},
 } as const
 
 const appShellMessages = {
