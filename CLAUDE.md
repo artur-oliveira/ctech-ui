@@ -11,7 +11,7 @@ wins and this file must be fixed. Install on a new machine:
 This is a shared frontend package consumed (or meant to be consumed) by every CTech product UI —
 breaking changes here should be versioned and communicated, not made casually.
 
-Package version `0.10.0`. Confirmed consumers (sibling `ui/package.json`, 2026-10-19): **ctech-billing**
+Package version `0.11.0`. Confirmed consumers (sibling `ui/package.json`, 2026-10-19): **ctech-billing**
 only (`^0.8.2`, 119 files under `ui/src` import from `@aoctech/ui`). `ctech-account`, `ctech-wallet`,
 `ctech-dfe` and `ctech-poker` do not depend on it yet and vendor their own local component sets (their `ui/`
 predates this repo). Migrating them is the plan (`ctech-skills/docs/plans/2026-10-19-ctech-standardization-plan.md`,
